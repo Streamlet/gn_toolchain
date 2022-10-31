@@ -1,0 +1,16 @@
+config("compiler_defaults") {
+  if (is_linux) {
+    cflags = [
+      "-fPIC",
+      "-pthread",
+    ]
+  }
+}
+config("executable_ldconfig") {
+  if (!is_mac) {
+    ldflags = [
+      "-Wl,-rpath=\$ORIGIN/",
+      "-Wl,-rpath-link=",
+    ]
+  }
+}
