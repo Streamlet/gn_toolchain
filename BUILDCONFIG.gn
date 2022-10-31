@@ -56,6 +56,8 @@ declare_args() {
 
 if (is_linux) {
   set_default_toolchain("//build/toolchain/linux:gcc")
+} else if (is_mac) {
+  set_default_toolchain("//build/toolchain/mac:clang")
 } else {
   assert(false, "Unsupported target_os: $target_os")
 }
@@ -78,3 +80,9 @@ set_defaults("shared_library") {
 set_defaults("source_set") {
   configs = _shared_binary_target_configs
 }
+
+# =============================================================================
+# IMPORTS
+# =============================================================================
+
+import("app_bundle.gni")
