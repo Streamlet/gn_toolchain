@@ -1,16 +1,41 @@
 config("compiler_defaults") {
-  if (is_linux) {
-    cflags = [
-      "-fPIC",
-      "-pthread",
+  defines = []
+  if (is_debug) {
+    defines += [
+      "DEBUG",
+      "_DEBUG",
     ]
+  } else {
+    defines += [ "NDEBUG" ]
+  }
+
+  cflags = []
+  if (is_posix) {
+    if (is_debug) {
+      cflags += [
+        "-g",
+        "-O0",
+        "-Og",
+      ]
+    } else {
+      cflags += [ "-Ofast" ]
+    }
+    if (is_linux) {
+      cflags += [
+        "-fPIC",
+        "-pthread",
+      ]
+    }
   }
 }
 config("executable_ldconfig") {
-  if (!is_mac) {
-    ldflags = [
-      "-Wl,-rpath=\$ORIGIN/",
-      "-Wl,-rpath-link=",
-    ]
+  ldflags = []
+  if (is_posix) {
+    if (!is_apple) {
+      ldflags += [
+        "-Wl,-rpath=\$ORIGIN/",
+        "-Wl,-rpath-link=",
+      ]
+    }
   }
 }

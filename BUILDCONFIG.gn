@@ -66,19 +66,19 @@ if (is_linux) {
 # TARGET DEFAULTS
 # =============================================================================
 
-_shared_binary_target_configs = [ "//build/config:compiler_defaults" ]
+_compile_defaults = [ "//build/config:compiler_defaults" ]
 set_defaults("executable") {
-  configs = _shared_binary_target_configs
+  configs = _compile_defaults
   configs += [ "//build/config:executable_ldconfig" ]
 }
 set_defaults("static_library") {
-  configs = _shared_binary_target_configs
+  configs = _compile_defaults
 }
 set_defaults("shared_library") {
-  configs = _shared_binary_target_configs
+  configs = _compile_defaults
 }
 set_defaults("source_set") {
-  configs = _shared_binary_target_configs
+  configs = _compile_defaults
 }
 
 # =============================================================================
