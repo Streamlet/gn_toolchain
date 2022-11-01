@@ -50,8 +50,7 @@ toolchain("clang") {
     rspfile = soname + ".rsp"
     os_specific_option = "-install_name @executable_path/$sofile"
     rspfile_content = "{{inputs}} {{solibs}} {{libs}}"
-    command =
-        "clang++ -shared {{ldflags}} -o $sofile $os_specific_option @$rspfile"
+    command = "clang++ -shared {{ldflags}} -o $sofile $os_specific_option @$rspfile"
     description = "SOLINK $soname"
     default_output_extension = ".so"
     default_output_dir = "{{root_out_dir}}"

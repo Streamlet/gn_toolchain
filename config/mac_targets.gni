@@ -54,4 +54,15 @@ if (is_mac) {
       deps = [ ":$app_name.app" ]
     }
   }
+
+  template("dynamic_library") {
+    shared_library("$target_name") {
+      forward_variables_from(invoker,
+                             "*",
+                             [
+                               "output_extension",
+                             ])
+      output_extension = "dylib"
+    }
+  }
 }

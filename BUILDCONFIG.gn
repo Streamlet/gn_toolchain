@@ -85,4 +85,4 @@ set_defaults("source_set") {
 # IMPORTS
 # =============================================================================
 
-import("app_bundle.gni")
+import("./config/mac_targets.gni")
