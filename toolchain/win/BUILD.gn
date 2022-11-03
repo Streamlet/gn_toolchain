@@ -1,0 +1,143 @@
+toolchain("msvc") {
+  lib_switch = ""
+  lib_dir_switch = "/LIBPATH:"
+
+  tool("cc") {
+    precompiled_header_type = "msvc"
+    pdbname = "{{target_out_dir}}/{{label_name}}_c.pdb"
+
+    # Label names may have spaces in them so the pdbname must be quoted. The
+    # source and output don't need to be quoted because GN knows they're a
+    # full file name and will quote automatically when necessary.
+    depfile = "{{output}}.d"
+    command = "cl /c {{source}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} /Fo{{output}} /Fd\"$pdbname\""
+    depsformat = "msvc"
+    description = "CC {{output}}"
+    outputs = [ "{{source_out_dir}}/{{source_name_part}}.obj" ]
+  }
+  tool("cxx") {
+    precompiled_header_type = "msvc"
+
+    # The PDB name needs to be different between C and C++ compiled files.
+    pdbname = "{{target_out_dir}}/{{label_name}}_cc.pdb"
+
+    # See comment in CC tool about quoting.
+    depfile = "{{output}}.d"
+    command = "cl /c {{source}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} /Fo{{output}} /Fd\"$pdbname\""
+    depsformat = "msvc"
+    description = "CXX {{output}}"
+    outputs = [ "{{source_out_dir}}/{{source_name_part}}.obj" ]
+  }
+  tool("rc") {
+    depfile = "{{output}}.d"
+    command = "rc /nologo /fo{{output}} {{source}}"
+    depsformat = "msvc"
+    description = "RC {{source}}"
+    outputs = [ "{{source_out_dir}}/{{source_name_part}}.res" ]
+  }
+  tool("asm") {
+    # For MSVC we can just use the C compiler to compile assembly.
+    depfile = "{{output}}.d"
+    command = "cl -MMD -MF $depfile {{defines}} {{include_dirs}} {{asmflags}} -c {{source}} -o {{output}}"
+    depsformat = "msvc"
+    description = "ASM {{output}}"
+    outputs = [ "{{source_out_dir}}/{{source_name_part}}.o" ]
+  }
+  tool("alink") {
+    rspfile = "{{output}}.rsp"
+    command = "lib /OUT:{{output}} /nologo {{arflags}} @$rspfile"
+    description = "LIB {{output}}"
+    outputs =
+        [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
+    default_output_extension = ".lib"
+
+    # The use of inputs_newline is to work around a fixed per-line buffer
+    # size in the linker.
+    rspfile_content = "{{inputs_newline}}"
+  }
+  tool("solink") {
+    dllname = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
+    libname = "${dllname}.lib"
+    pdbname = "${dllname}.pdb"
+    rspfile = "${dllname}.rsp"
+    command = "link /OUT:$dllname /nologo /IMPLIB:$libname /DLL /PDB:$pdbname @$rspfile"
+    description = "LINK(DLL) {{output}}"
+    default_output_extension = ".dll"
+    default_output_dir = "{{root_out_dir}}"
+    outputs = [
+      dllname,
+      libname,
+      pdbname,
+    ]
+    link_output = libname
+    depend_output = libname
+    runtime_outputs = [
+      dllname,
+      pdbname,
+    ]
+
+    # Since the above commands only updates the .lib file when it changes,
+    # ask Ninja to check if the timestamp actually changed to know if
+    # downstream dependencies should be recompiled.
+    restat = true
+
+    # The use of inputs_newline is to work around a fixed per-line buffer
+    # size in the linker.
+    rspfile_content =
+        "{{libs}} {{solibs}} {{inputs_newline}} {{ldflags}} {{rlibs}}"
+  }
+  tool("solink_module") {
+    dllname = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
+    pdbname = "${dllname}.pdb"
+    rspfile = "${dllname}.rsp"
+
+    command = "link /OUT:$dllname /nologo /DLL /PDB:$pdbname @$rspfile"
+
+    default_output_extension = ".dll"
+    default_output_dir = "{{root_out_dir}}"
+    description = "LINK_MODULE(DLL) {{output}}"
+    outputs = [
+      dllname,
+      pdbname,
+    ]
+    runtime_outputs = outputs
+
+    # The use of inputs_newline is to work around a fixed per-line buffer
+    # size in the linker.
+    rspfile_content =
+        "{{libs}} {{solibs}} {{inputs_newline}} {{ldflags}} {{rlibs}}"
+  }
+  tool("link") {
+    exename = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
+    pdbname = "$exename.pdb"
+    rspfile = "$exename.rsp"
+
+    command = "link /OUT:$exename /nologo /PDB:$pdbname @$rspfile"
+
+    default_output_extension = ".exe"
+    default_output_dir = "{{root_out_dir}}"
+    description = "LINK {{output}}"
+    outputs = [
+      exename,
+      pdbname,
+    ]
+    runtime_outputs = outputs
+
+    # The use of inputs_newline is to work around a fixed per-line buffer
+    # size in the linker.
+    rspfile_content =
+        "{{inputs_newline}} {{libs}} {{solibs}} {{ldflags}} {{rlibs}}"
+  }
+
+  # These two are really entirely generic, but have to be repeated in
+  # each toolchain because GN doesn't allow a template to be used here.
+  # See //build/toolchain/toolchain.gni for details.
+  tool("stamp") {
+    command = "cmd /c type nul > \"{{output}}\""
+    description = "STAMP {{output}}"
+  }
+  tool("copy") {
+    command = "copy /Y {{source}} {{output}}"
+    description = "COPY {{source}} {{output}}"
+  }
+}

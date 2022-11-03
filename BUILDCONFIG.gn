@@ -58,6 +58,8 @@ if (is_linux) {
   set_default_toolchain("//build/toolchain/linux:gcc")
 } else if (is_mac) {
   set_default_toolchain("//build/toolchain/mac:clang")
+} else if (is_win) {
+  set_default_toolchain("//build/toolchain/win:msvc")
 } else {
   assert(false, "Unsupported target_os: $target_os")
 }
