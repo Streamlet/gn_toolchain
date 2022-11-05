@@ -157,6 +157,28 @@ toolchain("clang") {
     link_output = dylib
     depend_output = tocname
   }
+  tool("solink_module") {
+    # E.g. "./libfoo.so":
+    sofile = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
+    rspfile = sofile + ".rsp"
+
+    link_command =
+        "$ld -bundle {{ldflags}} -o \"$sofile\" \"@$rspfile\" && $dsym_switch"
+    command = link_command
+
+    rspfile_content = "{{inputs}} {{frameworks}} {{solibs}} {{libs}} {{rlibs}}"
+
+    description = "SOLINK_MODULE {{output}}"
+
+    # Use this for {{output_extension}} expansions unless a target manually
+    # overrides it (in which case {{output_extension}} will be what the target
+    # specifies).
+    default_output_dir = "{{root_out_dir}}"
+    default_output_extension = ".so"
+
+    outputs = [ sofile ]
+    outputs += dsym_output
+  }
   tool("link") {
     outfile = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
     rspfile = "$outfile.rsp"

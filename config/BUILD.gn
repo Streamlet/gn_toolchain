@@ -37,11 +37,17 @@ config("compiler_defaults") {
     }
   }
   if (is_win) {
+    cflags += [ "/Zi" ]
     if (is_debug) {
-      cflags += [ "-Od" ]
+      cflags += [ "/Od" ]
     } else {
-      cflags += [ "-O2" ]
+      cflags += [ "/O2" ]
     }
+  }
+
+  ldflags = []
+  if (is_win) {
+    ldflags += [ "/DEBUG" ]
   }
 }
 config("executable_ldconfig") {
