@@ -17,9 +17,12 @@ config("compiler_defaults") {
 
   cflags = []
   if (is_posix) {
+    cflags += [
+      "-g",
+      "-fvisibility=hidden",
+    ]
     if (is_debug) {
       cflags += [
-        "-g",
         "-O0",
         "-Og",
       ]

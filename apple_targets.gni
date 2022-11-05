@@ -1,13 +1,12 @@
-if (is_mac) {
+if (is_apple) {
   template("app_bundle") {
     assert(defined(invoker.sources), "Sources must be defined")
-    assert(defined(invoker.info_list), "Info.plist must be defined")
+    assert(defined(invoker.info_plist), "Info.plist must be defined")
 
     app_name = target_name
-    gen_path = target_gen_dir
 
     bundle_data("${app_name}_bundle_info_plist") {
-      sources = [ invoker.info_list ]
+      sources = [ invoker.info_plist ]
       outputs = [ "{{bundle_contents_dir}}/Info.plist" ]
     }
 
@@ -19,18 +18,13 @@ if (is_mac) {
     }
 
     executable("${app_name}_generate_executable") {
-      forward_variables_from(invoker,
-                             "*",
-                             [
-                               "output_name",
-                               "visibility",
-                             ])
-      output_name = rebase_path("$gen_path/$app_name", root_build_dir)
+      forward_variables_from(invoker, "*", [ "output_name" ])
+      output_name = "$app_name"
     }
 
     bundle_data("${app_name}_bundle_executable") {
       public_deps = [ ":${app_name}_generate_executable" ]
-      sources = [ "$gen_path/$app_name" ]
+      sources = [ "$root_build_dir/$app_name" ]
       outputs = [ "{{bundle_executable_dir}}/$app_name" ]
     }
 
@@ -52,17 +46,6 @@ if (is_mac) {
 
     group("$app_name") {
       deps = [ ":$app_name.app" ]
-    }
-  }
-
-  template("dynamic_library") {
-    shared_library("$target_name") {
-      forward_variables_from(invoker,
-                             "*",
-                             [
-                               "output_extension",
-                             ])
-      output_extension = "dylib"
     }
   }
 }

@@ -1,72 +1,173 @@
 toolchain("clang") {
+  cc = "clang"
+  cxx = "clang++"
+  ld = cxx
+
+  # Use explicit paths to binaries. The binaries present on the default
+  # search path in /usr/bin are thin wrappers around xcrun, which requires a
+  # full CommandLineTools or Xcode install, and still may not choose the
+  # appropriate binary if there are multiple installs.
+  if (host_os == "mac") {
+    libtool = "libtool"
+    nm = "nm"
+    otool = "otool"
+  } else {
+    ar = "llvm-ar"
+    nm = "llvm-nm"
+    otool = "llvm-otool"
+  }
+
+  # Make these apply to all tools below.
+  lib_switch = "-l"
+  lib_dir_switch = "-L"
+
+  # Object files go in this directory. Use label_name instead of
+  # target_output_name since labels will generally have no spaces and will be
+  # unique in the directory.
+  object_subdir = "{{target_out_dir}}/{{label_name}}"
+
+  # If dSYMs are enabled, this flag will be added to the link tools.
+  linker_out = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
+  dsym_output_dir =
+      "{{root_out_dir}}/{{target_output_name}}{{output_extension}}.dSYM"
+  dsymutil_comand = "dsymutil -o $dsym_output_dir $linker_out"
+  strip_command = "strip -x -S $linker_out"
+  dsym_switch = "$dsymutil_comand && $strip_command"
+
+  dsym_output = [
+    "$dsym_output_dir/Contents/Info.plist",
+    "$dsym_output_dir/Contents/Resources/DWARF/{{target_output_name}}{{output_extension}}",
+  ]
+
   tool("cc") {
     depfile = "{{output}}.d"
-    command = "clang -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+    precompiled_header_type = "gcc"
+    command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "CC {{output}}"
-    outputs = [ "{{source_out_dir}}/{{source_name_part}}.o" ]
+    outputs = [ "$object_subdir/{{source_name_part}}.o" ]
   }
+
   tool("cxx") {
     depfile = "{{output}}.d"
-    command = "clang++ -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
+    precompiled_header_type = "gcc"
+    command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "CXX {{output}}"
-    outputs = [ "{{source_out_dir}}/{{source_name_part}}.o" ]
+    outputs = [ "$object_subdir/{{source_name_part}}.o" ]
   }
+
   tool("asm") {
     # For GCC we can just use the C compiler to compile assembly.
     depfile = "{{output}}.d"
-    command = "clang++ -MMD -MF $depfile {{defines}} {{include_dirs}} {{asmflags}} -c {{source}} -o {{output}}"
+    command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{asmflags}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "ASM {{output}}"
-    outputs = [ "{{source_out_dir}}/{{source_name_part}}.o" ]
+    outputs = [ "$object_subdir/{{source_name_part}}.o" ]
   }
+
   tool("objc") {
     depfile = "{{output}}.d"
     precompiled_header_type = "gcc"
-    command = "clang++ -MMD -MF $depfile {{defines}} {{include_dirs}} {{framework_dirs}} {{cflags}} {{cflags_objc}} -c {{source}} -o {{output}}"
+    command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{framework_dirs}} {{cflags}} {{cflags_objc}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "OBJC {{output}}"
-    outputs = [ "{{source_out_dir}}/{{source_name_part}}.o" ]
+    outputs = [ "$object_subdir/{{source_name_part}}.o" ]
   }
+
   tool("objcxx") {
     depfile = "{{output}}.d"
     precompiled_header_type = "gcc"
-    command = "clang++ -MMD -MF $depfile {{defines}} {{include_dirs}} {{framework_dirs}} {{cflags}} {{cflags_objcc}} -c {{source}} -o {{output}}"
+    command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{framework_dirs}} {{cflags}} {{cflags_objcc}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "OBJCXX {{output}}"
-    outputs = [ "{{source_out_dir}}/{{source_name_part}}.o" ]
+    outputs = [ "$object_subdir/{{source_name_part}}.o" ]
   }
+
   tool("alink") {
-    command = "rm -f {{output}} && ar rcs {{output}} {{inputs}}"
-    description = "AR {{target_output_name}}{{output_extension}}"
-    outputs = [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
+    rspfile = "{{output}}.rsp"
+    rspfile_content = "{{inputs}}"
+
+    if (host_os == "mac") {
+      command = "rm -f {{output}} && $libtool -static -D {{arflags}} -o {{output}} @$rspfile"
+      description = "LIBTOOL-STATIC {{output}}"
+    } else {
+      command = "$ar {{arflags}} -r -c -s -D {{output}} @$rspfile"
+
+      # Remove the output file first so that ar doesn't try to modify the
+      # existing file.
+      command = "rm -f {{output}} && $command"
+      description = "AR {{output}}"
+    }
+
+    outputs = [ "{{output_dir}}/{{target_output_name}}{{output_extension}}" ]
+    default_output_dir = "{{target_out_dir}}"
     default_output_extension = ".a"
     output_prefix = "lib"
   }
   tool("solink") {
-    soname = "{{target_output_name}}{{output_extension}}"
-    sofile = "{{output_dir}}/$soname"
-    rspfile = soname + ".rsp"
-    os_specific_option = "-install_name @executable_path/$sofile"
-    rspfile_content = "{{inputs}} {{solibs}} {{libs}}"
-    command = "clang++ -shared {{ldflags}} -o $sofile $os_specific_option @$rspfile"
-    description = "SOLINK $soname"
-    default_output_extension = ".so"
+    # E.g. "./libfoo.dylib":
+    dylib = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
+    rspfile = dylib + ".rsp"
+
+    # These variables are not built into GN but are helpers that implement
+    # (1) linking to produce a .dylib, (2) extracting the symbols from that
+    # file to a temporary file, (3) if the temporary file has differences from
+    # the existing .TOC file, overwrite it, otherwise, don't change it.
+    #
+    # As a special case, if the library reexports symbols from other dynamic
+    # libraries, we always update the .TOC and skip the temporary file and
+    # diffing steps, since that library always needs to be re-linked.
+    tocname = dylib + ".TOC"
+    temporary_tocname = dylib + ".tmp"
+
+    does_reexport_command = "[ ! -e \"$dylib\" -o ! -e \"$tocname\" ] || $otool -l \"$dylib\" | grep -q LC_REEXPORT_DYLIB"
+
+    link_command =
+        "$ld -shared {{ldflags}} -o \"$dylib\" \"@$rspfile\" && $dsym_switch"
+    replace_command = "if ! cmp -s \"$temporary_tocname\" \"$tocname\"; then mv \"$temporary_tocname\" \"$tocname\""
+    extract_toc_command = "{ $otool -l \"$dylib\" | grep LC_ID_DYLIB -A 5; $nm -gPp \"$dylib\" | cut -f1-2 -d' ' | grep -v U\$\$; true; }"
+
+    command = "if $does_reexport_command ; then $link_command && $extract_toc_command > \"$tocname\"; else $link_command && $extract_toc_command > \"$temporary_tocname\" && $replace_command ; fi; fi"
+
+    rspfile_content = "{{inputs}} {{frameworks}} {{solibs}} {{libs}} {{rlibs}}"
+
+    description = "SOLINK {{output}}"
+
+    # Use this for {{output_extension}} expansions unless a target manually
+    # overrides it (in which case {{output_extension}} will be what the target
+    # specifies).
     default_output_dir = "{{root_out_dir}}"
-    outputs = [ sofile ]
-    link_output = sofile
-    depend_output = sofile
+    default_output_extension = ".dylib"
+
     output_prefix = "lib"
+
+    # Since the above commands only updates the .TOC file when it changes, ask
+    # Ninja to check if the timestamp actually changed to know if downstream
+    # dependencies should be recompiled.
+    restat = true
+
+    # Tell GN about the output files. It will link to the dylib but use the
+    # tocname for dependency management.
+    outputs = [
+      dylib,
+      tocname,
+    ]
+    outputs += dsym_output
+    link_output = dylib
+    depend_output = tocname
   }
   tool("link") {
-    outfile = "{{target_output_name}}{{output_extension}}"
+    outfile = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
     rspfile = "$outfile.rsp"
-    command = "clang++ {{ldflags}} -o $outfile @$rspfile {{solibs}} {{libs}}"
+
+    command = "$ld {{ldflags}} -o \"$outfile\" \"@$rspfile\" && $dsym_switch"
     description = "LINK $outfile"
-    default_output_dir = "{{root_out_dir}}"
-    rspfile_content = "{{inputs}}"
+    rspfile_content = "{{inputs}} {{frameworks}} {{solibs}} {{libs}} {{rlibs}}"
+
     outputs = [ outfile ]
+    outputs += dsym_output
+    default_output_dir = "{{root_out_dir}}"
   }
   tool("stamp") {
     command = "touch {{output}}"
@@ -77,7 +178,19 @@ toolchain("clang") {
     description = "COPY {{source}} {{output}}"
   }
   tool("copy_bundle_data") {
-    command = "rm -rf {{output}} && /bin/cp -Rc {{source}} {{output}}"
+    # copy_command use hardlink if possible but this does not work with
+    # directories. Also when running EG2 tests from Xcode, Xcode tries to
+    # copy some files into the application bundle which fails if source
+    # and destination are hardlinked together.
+    #
+    # Instead use clonefile to copy the files which is as efficient as
+    # hardlink but ensure the file have distinct metadata (thus avoid the
+    # error with ditto, see https://crbug.com/1042182).
+    if (host_os == "mac") {
+      command = "rm -rf {{output}} && cp -Rc {{source}} {{output}}"
+    } else {
+      command = "rm -rf {{output}} && cp -Rl {{source}} {{output}}"
+    }
     description = "COPY_BUNDLE_DATA {{source}} {{output}}"
   }
 }
