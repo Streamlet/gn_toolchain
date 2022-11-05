@@ -17,18 +17,6 @@ toolchain("msvc") {
   # Object files go in this directory.
   object_subdir = "{{target_out_dir}}/{{label_name}}"
 
-  # If possible, pass system includes as flags to the compiler.  When that's
-  # not possible, load a full environment file (containing %INCLUDE% and
-  # %PATH%) -- e.g. 32-bit MSVS builds require %PATH% to be set and just
-  # passing in a list of include directories isn't enough.
-  sys_include_flags = ""
-  sys_lib_flags = ""
-  if (target_cpu == "x64") {
-    sys_lib_flags += " /MACHINE:X64"
-  } else if (target_cpu == "x86") {
-    sys_lib_flags += " /MACHINE:X86"
-  }
-
   tool("cc") {
     precompiled_header_type = "msvc"
     pdbname = "{{target_out_dir}}/{{label_name}}_c.pdb"
@@ -40,7 +28,7 @@ toolchain("msvc") {
     description = "CC {{output}}"
     outputs = [ "$object_subdir/{{source_name_part}}.obj" ]
 
-    command = "$cl /c {{source}} /nologo $sys_include_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} /Fo{{output}} /Fd\"$pdbname\""
+    command = "$cl /c {{source}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} /Fo{{output}} /Fd\"$pdbname\""
   }
   tool("cxx") {
     precompiled_header_type = "msvc"
@@ -53,10 +41,10 @@ toolchain("msvc") {
     description = "CXX {{output}}"
     outputs = [ "$object_subdir/{{source_name_part}}.obj" ]
 
-    command = "$cl /Zi /c {{source}} /Fo{{output}} /nologo $sys_include_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} /Fd\"$pdbname\""
+    command = "$cl /Zi /c {{source}} /Fo{{output}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} /Fd\"$pdbname\""
   }
   tool("rc") {
-    command = "$rc /nologo $sys_include_flags {{defines}} {{include_dirs}} /fo{{output}} {{source}}"
+    command = "$rc /nologo {{defines}} {{include_dirs}} /fo{{output}} {{source}}"
     depsformat = "msvc"
     outputs = [ "$object_subdir/{{source_name_part}}.res" ]
     description = "RC {{output}}"
@@ -89,7 +77,7 @@ toolchain("msvc") {
     pdbname = "${dllname}.pdb"
     rspfile = "${dllname}.rsp"
 
-    command = "$link /OUT:$dllname /nologo $sys_lib_flags /IMPLIB:$libname /DLL /PDB:$pdbname @$rspfile"
+    command = "$link /OUT:$dllname /nologo /IMPLIB:$libname /DLL /PDB:$pdbname @$rspfile"
 
     default_output_extension = ".dll"
     default_output_dir = "{{root_out_dir}}"
@@ -122,7 +110,7 @@ toolchain("msvc") {
     pdbname = "${dllname}.pdb"
     rspfile = "${dllname}.rsp"
 
-    command = "$link /OUT:$dllname /nologo $sys_lib_flags /DLL /PDB:$pdbname @$rspfile"
+    command = "$link /OUT:$dllname /nologo /DLL /PDB:$pdbname @$rspfile"
 
     default_output_extension = ".dll"
     default_output_dir = "{{root_out_dir}}"
@@ -144,7 +132,7 @@ toolchain("msvc") {
     rspfile = "$exename.rsp"
 
     command =
-        "$link /OUT:$exename /nologo $sys_lib_flags /PDB:$pdbname @$rspfile"
+        "$link /OUT:$exename /nologo /PDB:$pdbname @$rspfile"
 
     default_output_extension = ".exe"
     default_output_dir = "{{root_out_dir}}"

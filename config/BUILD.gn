@@ -48,6 +48,11 @@ config("compiler_defaults") {
   ldflags = []
   if (is_win) {
     ldflags += [ "/DEBUG" ]
+    if (target_cpu == "x64") {
+      ldflags += [ "/MACHINE:X64" ]
+    } else if (target_cpu == "x86") {
+      ldflags += [ "/MACHINE:X86" ]
+    }
   }
 }
 config("executable_ldconfig") {

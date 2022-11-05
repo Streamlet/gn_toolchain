@@ -1,0 +1,45 @@
+# =============================================================================
+# Dynamic or static link CRT
+# =============================================================================
+
+config("dynamic_runtime") {
+  cflags = []
+  if (is_debug) {
+    cflags += [ "/MDd" ]
+  } else {
+    cflags += [ "/MD" ]
+  }
+}
+
+config("static_runtime") {
+  cflags = []
+  if (is_debug) {
+    cflags += [ "/MTd" ]
+  } else {
+    cflags += [ "/MT" ]
+  }
+}
+
+# =============================================================================
+# SUBSYSTEM: Console or Windows
+# =============================================================================
+
+config("console_subsystem") {
+  ldflags = [ "/SUBSYSTEM:CONSOLE" ]
+}
+
+config("windows_subsystem") {
+  ldflags = [ "/SUBSYSTEM:WINDOWS" ]
+}
+
+# =============================================================================
+# Windows XP Support
+# =============================================================================
+
+config("console_subsystem_xp") {
+  ldflags = [ "/SUBSYSTEM:CONSOLE,5.01" ]
+}
+
+config("windows_subsystem_xp") {
+  ldflags = [ "/SUBSYSTEM:WINDOWS,5.01" ]
+}
