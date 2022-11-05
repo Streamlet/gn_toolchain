@@ -26,7 +26,7 @@ Please refer to project [gn_toolchain_sample](../../../gn_toolchain_sample).
 
 1. Download binaries from official website: https://ninja-build.org/
 2. Build from source code: git://github.com/ninja-build/ninja.git
-3. Get from package manager, package name is 'ninja-build'
+3. Get from package manager, package name is 'ninja' or 'ninja-build'
 
 ## Fetch gn
 

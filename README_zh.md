@@ -26,7 +26,7 @@ buildconfig = "//build/BUILDCONFIG.gn"
 
 1. 从官方网站下载二进制包：https://ninja-build.org/
 2. 从源代码编译：git://github.com/ninja-build/ninja.git
-3. 从包管理器获取，包名为‘ninja-build’
+3. 从包管理器获取，包名为‘ninja’或‘ninja-build’
 
 ## 获取 gn
 
