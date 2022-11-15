@@ -28,7 +28,7 @@ toolchain("msvc") {
     description = "CC {{output}}"
     outputs = [ "$object_subdir/{{source_name_part}}.obj" ]
 
-    command = "$cl /c {{source}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} /Fo{{output}} /Fd\"$pdbname\""
+    command = "$cl /c {{source}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} /Fo{{output}} /Fd\"$pdbname\" /FS"
   }
   tool("cxx") {
     precompiled_header_type = "msvc"
@@ -41,7 +41,7 @@ toolchain("msvc") {
     description = "CXX {{output}}"
     outputs = [ "$object_subdir/{{source_name_part}}.obj" ]
 
-    command = "$cl /Zi /c {{source}} /Fo{{output}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} /Fd\"$pdbname\""
+    command = "$cl /Zi /c {{source}} /Fo{{output}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} /Fd\"$pdbname\" /FS"
   }
   tool("rc") {
     command = "$rc /nologo {{defines}} {{include_dirs}} /fo{{output}} {{source}}"
