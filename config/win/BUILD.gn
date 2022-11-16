@@ -6,8 +6,10 @@ config("dynamic_runtime") {
   cflags = []
   if (is_debug) {
     cflags += [ "/MDd" ]
+    libs = [ "MSVCRTD.lib" ]
   } else {
     cflags += [ "/MD" ]
+    libs = [ "MSVCRT.lib" ]
   }
 }
 
@@ -15,8 +17,10 @@ config("static_runtime") {
   cflags = []
   if (is_debug) {
     cflags += [ "/MTd" ]
+    libs = [ "LIBCMTD.lib" ]
   } else {
     cflags += [ "/MT" ]
+    libs = [ "LIBCMT.lib" ]
   }
 }
 

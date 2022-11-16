@@ -37,12 +37,35 @@ config("compiler_defaults") {
     }
   }
   if (is_win) {
-    cflags += [ "/Zi" ]
+    cflags += [
+      "/Zi",
+      "/Zl",
+      "/bigobj",
+      "/Oy-",
+      "/Gm-",
+      "/GS",
+      "/fp:precise",
+      "/Gd",
+      "/Zc:inline",
+    ]
     if (is_debug) {
-      cflags += [ "/Od" ]
+      cflags += [
+        "/Od",
+        "/RTC1",
+      ]
     } else {
-      cflags += [ "/O2" ]
+      cflags += [
+        "/O2",
+        "/Oi",
+        "/Gy",
+        "/GL",
+      ]
     }
+  }
+
+  cflags_cc = []
+  if (is_win) {
+    cflags_cc += [ "/EHsc" ]
   }
 
   ldflags = []
@@ -52,6 +75,13 @@ config("compiler_defaults") {
       ldflags += [ "/MACHINE:X64" ]
     } else if (target_cpu == "x86") {
       ldflags += [ "/MACHINE:X86" ]
+    }
+    if (!is_debug) {
+      ldflags += [
+        "/OPT:REF",
+        "/OPT:ICF",
+        "/LTCG:incremental",
+      ]
     }
   }
 }
