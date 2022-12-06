@@ -22,14 +22,19 @@ buildconfig = "//build/BUILDCONFIG.gn"
 
 见项目 [gn_toolchain_sample](../../../gn_toolchain_sample)。
 
-## 获取 ninja
+## 获取 gn & ninja
 
-1. 从官方网站下载二进制包：https://ninja-build.org/
-2. 从源代码编译：git://github.com/ninja-build/ninja.git
-3. 从包管理器获取，包名为‘ninja’或‘ninja-build’
-
-## 获取 gn
-
-1. 从官方网站下载二进制包：https://gn.googlesource.com/gn/#getting-a-binary
-2. 从源代码编译：https://gn.googlesource.com/gn
-3. 从包管理器获取，包名可尝试‘gn’、‘gn-devel’等
+* 从源代码编译
+  * https://gn.googlesource.com/gn
+  * git://github.com/ninja-build/ninja.git
+* 从官方网站下载二进制包
+  * https://gn.googlesource.com/gn/#getting-a-binary
+  * https://ninja-build.org/
+* 从包管理器获取，各包管理器的对应包名如下：
+  * Mac
+    * Homebrew：(无 gn)、ninja
+    * MacPorts：gn-devel、ninja
+  * Linux
+    * apt-get & apt：generate-ninja、ninja-build
+    * yum & dnf：gn、ninja-build
+    * pacman：gn、ninja

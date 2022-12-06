@@ -22,14 +22,19 @@ buildconfig = "//build/BUILDCONFIG.gn"
 
 Please refer to project [gn_toolchain_sample](../../../gn_toolchain_sample).
 
-## Fetch ninja
+## Fetch gn & ninja
 
-1. Download binaries from official website: https://ninja-build.org/
-2. Build from source code: git://github.com/ninja-build/ninja.git
-3. Get from package manager, package name is 'ninja' or 'ninja-build'
-
-## Fetch gn
-
-1. Download binaries from official website: https://gn.googlesource.com/gn/#getting-a-binary
-2. Build from source code: https://gn.googlesource.com/gn
-3. Get from package manager, try package name 'gn', 'gn-devel', etc.
+* Build from source code
+  * https://gn.googlesource.com/gn
+  * git://github.com/ninja-build/ninja.git
+* Download binaries from official website
+  * https://gn.googlesource.com/gn/#getting-a-binary
+  * https://ninja-build.org/
+* Get from package manager. Try package names as following:
+  * Mac
+    * Homebrew: (no gn), ninja
+    * MacPorts: gn-devel, ninja
+  * Linux
+    * apt-get & apt: generate-ninja, ninja-build
+    * yum & dnf: gn,ninja-build
+    * pacman: gn, ninja
