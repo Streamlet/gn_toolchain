@@ -4,23 +4,45 @@
 
 config("dynamic_runtime") {
   cflags = []
+  libs = [ "oldnames.lib" ]
   if (is_debug) {
     cflags += [ "/MDd" ]
-    libs = [ "MSVCRTD.lib" ]
+    libs += [
+      "ucrtd.lib",
+      "msvcrtd.lib",
+      "msvcprtd.lib",
+      "vcruntimed.lib",
+    ]
   } else {
     cflags += [ "/MD" ]
-    libs = [ "MSVCRT.lib" ]
+    libs += [
+      "ucrt.lib",
+      "msvcrt.lib",
+      "msvcprt.lib",
+      "vcruntime.lib",
+    ]
   }
 }
 
 config("static_runtime") {
   cflags = []
+  libs = [ "oldnames.lib" ]
   if (is_debug) {
     cflags += [ "/MTd" ]
-    libs = [ "LIBCMTD.lib" ]
+    libs += [
+      "libucrtd.lib",
+      "libcmtd.lib",
+      "libcpmtd.lib",
+      "libvcruntimed.lib",
+    ]
   } else {
     cflags += [ "/MT" ]
-    libs = [ "LIBCMT.lib" ]
+    libs += [
+      "libucrt.lib",
+      "libcmt.lib",
+      "libcpmt.lib",
+      "libvcruntime.lib",
+    ]
   }
 }
 
@@ -41,9 +63,9 @@ config("windows_subsystem") {
 # =============================================================================
 
 config("console_subsystem_xp") {
-  ldflags = [ "/SUBSYSTEM:CONSOLE,5.01" ]
+  ldflags = [ "/SUBSYSTEM:CONSOLE,5.02" ]
 }
 
 config("windows_subsystem_xp") {
-  ldflags = [ "/SUBSYSTEM:WINDOWS,5.01" ]
+  ldflags = [ "/SUBSYSTEM:WINDOWS,5.02" ]
 }
