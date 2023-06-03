@@ -87,4 +87,6 @@ set_defaults("source_set") {
 # IMPORTS
 # =============================================================================
 
-import("apple_targets.gni")
+if (is_apple) {
+  import("apple_targets.gni")
+}

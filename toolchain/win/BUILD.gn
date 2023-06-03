@@ -1,14 +1,19 @@
+import("setup_environment.gni")
+
 toolchain("msvc") {
-  cl = "cl"
-  rc = "rc"
-  lib = "lib"
-  link = "link"
+  cl = "cl.exe"
+  rc = "rc.exe"
+  lib = "lib.exe"
+  link = "link.exe"
 
   if (target_cpu == "x64") {
     ml = "ml64.exe"
   } else {
     ml = "ml.exe"
   }
+
+  env = "environment." + host_cpu + "." + target_cpu
+  env_wrappper = "ninja -t msvc -e $env --"
 
   # Make these apply to all tools below.
   lib_switch = ""
@@ -28,7 +33,7 @@ toolchain("msvc") {
     description = "CC {{output}}"
     outputs = [ "$object_subdir/{{source_name_part}}.obj" ]
 
-    command = "$cl /c {{source}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} /Fo{{output}} /Fd\"$pdbname\" /FS"
+    command = "$env_wrappper $cl /c {{source}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} /Fo{{output}} /Fd\"$pdbname\" /FS"
   }
   tool("cxx") {
     precompiled_header_type = "msvc"
@@ -41,22 +46,22 @@ toolchain("msvc") {
     description = "CXX {{output}}"
     outputs = [ "$object_subdir/{{source_name_part}}.obj" ]
 
-    command = "$cl /Zi /c {{source}} /Fo{{output}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} /Fd\"$pdbname\" /FS"
+    command = "$env_wrappper $cl /Zi /c {{source}} /Fo{{output}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} /Fd\"$pdbname\" /FS"
   }
   tool("rc") {
-    command = "$rc /nologo {{defines}} {{include_dirs}} /fo{{output}} {{source}}"
+    command = "$env_wrappper $rc /nologo {{defines}} {{include_dirs}} /fo{{output}} {{source}}"
     depsformat = "msvc"
     outputs = [ "$object_subdir/{{source_name_part}}.res" ]
     description = "RC {{output}}"
   }
   tool("asm") {
-    command = "$ml /nologo /Fo{{output}} {{defines}} {{include_dirs}} {{asmflags}} {{source}}"
+    command = "$env_wrappper $ml /nologo /Fo{{output}} {{defines}} {{include_dirs}} {{asmflags}} {{source}}"
     description = "ASM {{output}}"
     outputs = [ "$object_subdir/{{source_name_part}}.obj" ]
   }
   tool("alink") {
     rspfile = "{{output}}.rsp"
-    command = "$lib /OUT:{{output}} /nologo {{arflags}} @$rspfile"
+    command = "$env_wrappper $lib /OUT:{{output}} /nologo {{arflags}} @$rspfile"
     description = "LIB {{output}}"
     outputs = [
       # Ignore {{output_extension}} and always use .lib, there's no reason to
@@ -77,7 +82,7 @@ toolchain("msvc") {
     pdbname = "${dllname}.pdb"
     rspfile = "${dllname}.rsp"
 
-    command = "$link /OUT:$dllname /nologo /IMPLIB:$libname /DLL /PDB:$pdbname @$rspfile"
+    command = "$env_wrappper $link /OUT:$dllname /nologo /IMPLIB:$libname /DLL /PDB:$pdbname @$rspfile"
 
     default_output_extension = ".dll"
     default_output_dir = "{{root_out_dir}}"
@@ -110,7 +115,8 @@ toolchain("msvc") {
     pdbname = "${dllname}.pdb"
     rspfile = "${dllname}.rsp"
 
-    command = "$link /OUT:$dllname /nologo /DLL /PDB:$pdbname @$rspfile"
+    command =
+        "$env_wrappper $link /OUT:$dllname /nologo /DLL /PDB:$pdbname @$rspfile"
 
     default_output_extension = ".dll"
     default_output_dir = "{{root_out_dir}}"
@@ -132,7 +138,7 @@ toolchain("msvc") {
     rspfile = "$exename.rsp"
 
     command =
-        "$link /OUT:$exename /nologo /PDB:$pdbname @$rspfile"
+        "$env_wrappper $link /OUT:$exename /nologo /PDB:$pdbname @$rspfile"
 
     default_output_extension = ".exe"
     default_output_dir = "{{root_out_dir}}"

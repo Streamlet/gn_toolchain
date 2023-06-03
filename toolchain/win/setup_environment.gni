@@ -1,0 +1,7 @@
+assert(is_win)
+
+exec_script("setup_environment.py",
+            [
+              host_cpu,
+              target_cpu,
+            ])
