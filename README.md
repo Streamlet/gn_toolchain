@@ -36,5 +36,5 @@ Please refer to project [gn_toolchain_sample](../../../gn_toolchain_sample).
     * MacPorts: gn-devel, ninja
   * Linux
     * apt-get & apt: generate-ninja, ninja-build
-    * yum & dnf: gn,ninja-build
+    * yum & dnf: gn, ninja-build
     * pacman: gn, ninja
