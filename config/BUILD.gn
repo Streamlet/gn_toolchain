@@ -38,27 +38,35 @@ config("compiler_defaults") {
   }
   if (is_win) {
     cflags += [
-      "/Zi",
-      "/Zl",
+      "/analyze-",
       "/bigobj",
-      "/Oy-",
-      "/Gm-",
-      "/GS",
+      "/EHsc",
       "/fp:precise",
       "/Gd",
+      "/Gm-",
+      "/GS",
+      "/Oy-",
+      "/W3",
+      "/WX-",
+      "/Zc:forScope",
       "/Zc:inline",
+      "/Zc:wchar_t",
+      "/Zl",
     ]
     if (is_debug) {
       cflags += [
+        "/JMC",
         "/Od",
         "/RTC1",
+        "/ZI",
       ]
     } else {
       cflags += [
+        "/GL",
+        "/Gy",
         "/O2",
         "/Oi",
-        "/Gy",
-        "/GL",
+        "/Zi",
       ]
     }
   }
@@ -70,7 +78,10 @@ config("compiler_defaults") {
 
   ldflags = []
   if (is_win) {
-    ldflags += [ "/DEBUG" ]
+    ldflags += [
+      "/DEBUG",
+      "/MANIFESTUAC:level='highestAvailable' uiAccess='false'",
+    ]
     if (target_cpu == "x64") {
       ldflags += [ "/MACHINE:X64" ]
     } else if (target_cpu == "x86") {
@@ -78,9 +89,11 @@ config("compiler_defaults") {
     }
     if (!is_debug) {
       ldflags += [
-        "/OPT:REF",
-        "/OPT:ICF",
+        "/INCREMENTAL:NO",
         "/LTCG:incremental",
+        "/OPT:ICF",
+        "/OPT:REF",
+        "/SAFESEH",
       ]
     }
   }
