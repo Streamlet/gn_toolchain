@@ -80,7 +80,7 @@ config("compiler_defaults") {
   if (is_win) {
     ldflags += [
       "/DEBUG",
-      "/MANIFESTUAC:level='highestAvailable' uiAccess='false'",
+      "/MANIFEST:EMBED",
     ]
     if (target_cpu == "x64") {
       ldflags += [ "/MACHINE:X64" ]
