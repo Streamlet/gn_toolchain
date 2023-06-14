@@ -93,8 +93,10 @@ config("compiler_defaults") {
         "/LTCG:incremental",
         "/OPT:ICF",
         "/OPT:REF",
-        "/SAFESEH",
       ]
+      if (target_cpu == "x86") {
+        ldflags += [ "/SAFESEH" ]
+      }
     }
   }
 }
