@@ -68,10 +68,31 @@ if (is_linux) {
 # TARGET DEFAULTS
 # =============================================================================
 
-_compile_defaults = [ "//build/config:compiler_defaults" ]
+_compile_defaults = [ "//build/config:default" ]
+
+if (is_posix) {
+  _compile_defaults += [
+    "//build/config/posix:default",
+    "//build/config/posix:optmize",
+  ]
+}
+
+if (is_win) {
+  _compile_defaults += [
+    "//build/config/win:default",
+    "//build/config/win:optmize",
+    "//build/config/win:crt_link",
+    "//build/config/win:core_libraries",
+    "//build/config/win:win_macros",
+    "//build/config/win:target_arch",
+  ]
+}
+
 set_defaults("executable") {
   configs = _compile_defaults
-  configs += [ "//build/config:executable_ldconfig" ]
+  if (is_posix) {
+    configs += [ "//build/config/posix:rpath" ]
+  }
 }
 set_defaults("static_library") {
   configs = _compile_defaults
@@ -87,6 +108,4 @@ set_defaults("source_set") {
 # IMPORTS
 # =============================================================================
 
-if (is_apple) {
-  import("apple_targets.gni")
-}
+import("//build/config/target_template.gni")

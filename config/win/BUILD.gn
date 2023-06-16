@@ -1,68 +1,202 @@
+assert(is_win)
+
+declare_args() {
+  use_ucrt = false  # whether to use the Universal CRT or not
+  static_link_crt = true  # static or dynamic link crt
+  winver = "0x0A00"  # use to define WINVER, _WIN32_WINNT and _WIN32_WINDOWS
+}
+
+# =============================================================================
+# Default
+# =============================================================================
+
+config("default") {
+  defines = [
+    "UNICODE",
+    "_UNICODE",
+  ]
+
+  cflags = [
+    "/analyze-",
+    "/bigobj",
+    "/EHsc",
+    "/fp:precise",
+    "/Gd",
+    "/Gm-",
+    "/GS",
+    "/Oy-",
+    "/W3",
+    "/WX-",
+    "/Zc:forScope",
+    "/Zc:inline",
+    "/Zc:wchar_t",
+    "/Zl",
+    "/utf-8",
+  ]
+
+  cflags_cc = [ "/EHsc" ]
+
+  ldflags = [
+    "/DEBUG",
+    "/MANIFEST:EMBED",
+  ]
+}
+
+# =============================================================================
+# Optmize flags
+# =============================================================================
+
+config("optmize") {
+  cflags = []
+  if (is_debug) {
+    cflags += [
+      "/JMC",
+      "/Od",
+      "/RTC1",
+      "/ZI",
+    ]
+  } else {
+    cflags += [
+      "/GL",
+      "/Gy",
+      "/O2",
+      "/Oi",
+      "/Zi",
+    ]
+  }
+
+  ldflags = []
+  if (!is_debug) {
+    ldflags += [
+      "/INCREMENTAL:NO",
+      "/LTCG:incremental",
+      "/OPT:ICF",
+      "/OPT:REF",
+    ]
+    if (target_cpu == "x86") {
+      ldflags += [ "/SAFESEH" ]
+    }
+  }
+}
+
 # =============================================================================
 # Dynamic or static link CRT
 # =============================================================================
 
-config("dynamic_runtime") {
+config("crt_link") {
   cflags = []
-  libs = [ "oldnames.lib" ]
-  if (is_debug) {
-    cflags += [ "/MDd" ]
-    libs += [
-      "ucrtd.lib",
-      "msvcrtd.lib",
-      "msvcprtd.lib",
-      "vcruntimed.lib",
-    ]
+  if (static_link_crt) {
+    if (is_debug) {
+      cflags += [ "/MTd" ]
+    } else {
+      cflags += [ "/MT" ]
+    }
   } else {
-    cflags += [ "/MD" ]
-    libs += [
-      "ucrt.lib",
-      "msvcrt.lib",
-      "msvcprt.lib",
-      "vcruntime.lib",
-    ]
+    if (is_debug) {
+      cflags += [ "/MDd" ]
+    } else {
+      cflags += [ "/MD" ]
+    }
   }
-}
 
-config("static_runtime") {
-  cflags = []
   libs = [ "oldnames.lib" ]
-  if (is_debug) {
-    cflags += [ "/MTd" ]
-    libs += [
-      "libucrtd.lib",
-      "libcmtd.lib",
-      "libcpmtd.lib",
-      "libvcruntimed.lib",
-    ]
+  if (static_link_crt) {
+    if (is_debug) {
+      libs += [
+        "libcmtd.lib",
+        "libcpmtd.lib",
+        "libvcruntimed.lib",
+      ]
+      if (use_ucrt) {
+        libs += [ "libucrtd.lib" ]
+      }
+    } else {
+      libs += [
+        "libcmt.lib",
+        "libcpmt.lib",
+        "libvcruntime.lib",
+      ]
+      if (use_ucrt) {
+        libs += [ "libucrt.lib" ]
+      }
+    }
   } else {
-    cflags += [ "/MT" ]
-    libs += [
-      "libucrt.lib",
-      "libcmt.lib",
-      "libcpmt.lib",
-      "libvcruntime.lib",
-    ]
+    if (is_debug) {
+      libs += [
+        "msvcrtd.lib",
+        "msvcprtd.lib",
+        "vcruntimed.lib",
+      ]
+      if (use_ucrt) {
+        libs += [ "ucrtd.lib" ]
+      }
+    } else {
+      libs += [
+        "msvcrt.lib",
+        "msvcprt.lib",
+        "vcruntime.lib",
+      ]
+      if (use_ucrt) {
+        libs += [ "ucrt.lib" ]
+      }
+    }
   }
 }
 
 # =============================================================================
-# SUBSYSTEM: Console or Windows
+# Core libraries to link default
+# =============================================================================
+
+config("core_libraries") {
+  libs = [
+    "kernel32.lib",
+    "user32.lib",
+    "gdi32.lib",
+    "winspool.lib",
+    "comdlg32.lib",
+    "advapi32.lib",
+    "shell32.lib",
+    "ole32.lib",
+    "oleaut32.lib",
+    "uuid.lib",
+    "odbc32.lib",
+    "odbccp32.lib",
+  ]
+}
+
+# =============================================================================
+# Target arch
+# =============================================================================
+
+config("win_macros") {
+  defines = [
+    "WINVER =$winver",
+    "_WIN32_WINNT=$winver",
+    "_WIN32_WINDOWS=$winver",
+    "WIN32_LEAN_AND_MEAN",
+    "_CRT_NONSTDC_NO_DEPRECATE",
+    "_CRT_NONSTDC_NO_WARNINGS",
+    "WINAPI_FAMILY=100",  # Windows Desktop Applications
+  ]
+}
+
+# =============================================================================
+# Target arch
+# =============================================================================
+
+config("target_arch") {
+  if (target_cpu == "x86") {
+    ldflags = [ "/MACHINE:X86" ]
+  } else {
+    ldflags = [ "/MACHINE:X64" ]
+  }
+}
+
+# =============================================================================
+# Console or windows subsystem
 # =============================================================================
 
 config("console_subsystem") {
-  ldflags = [ "/SUBSYSTEM:CONSOLE" ]
-}
-
-config("windows_subsystem") {
-  ldflags = [ "/SUBSYSTEM:WINDOWS" ]
-}
-
-# =============================================================================
-# Windows XP Support
-# =============================================================================
-
-config("console_subsystem_xp") {
   if (target_cpu == "x86") {
     ldflags = [ "/SUBSYSTEM:CONSOLE,5.01" ]
   } else {
@@ -70,7 +204,7 @@ config("console_subsystem_xp") {
   }
 }
 
-config("windows_subsystem_xp") {
+config("windows_subsystem") {
   if (target_cpu == "x86") {
     ldflags = [ "/SUBSYSTEM:WINDOWS,5.01" ]
   } else {
