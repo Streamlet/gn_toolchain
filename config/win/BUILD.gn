@@ -174,9 +174,10 @@ config("win_macros") {
     "_WIN32_WINNT=$winver",
     "_WIN32_WINDOWS=$winver",
     "WIN32_LEAN_AND_MEAN",
+    "WINAPI_FAMILY=100",  # Windows Desktop Applications
     "_CRT_NONSTDC_NO_DEPRECATE",
     "_CRT_NONSTDC_NO_WARNINGS",
-    "WINAPI_FAMILY=100",  # Windows Desktop Applications
+    "_CRT_SECURE_NO_WARNINGS",
   ]
 }
 
