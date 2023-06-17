@@ -17,14 +17,14 @@ config("default") {
 # Optmize flags
 # =============================================================================
 
-config("optimize") {
+config("optmize") {
   if (is_debug) {
-    cflags += [
+    cflags = [
       "-O0",
       "-Og",
     ]
   } else {
-    cflags += [ "-Ofast" ]
+    cflags = [ "-Ofast" ]
   }
 }
 
