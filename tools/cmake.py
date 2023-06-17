@@ -37,7 +37,6 @@ def cmake_build(
             address_model,
         )
     options = ""
-    print(cmake_options)
     if len(cmake_options) > 0:
         options = " ".join(map(lambda item: "-D" + item, cmake_options.split(",")))
     config_cmd = "cmake %s %s -S %s -B %s %s" % (

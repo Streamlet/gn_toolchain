@@ -128,6 +128,11 @@ if (is_win) {
   import("//build/config/win/application.gni")
 }
 
+# help to build makefile projects
+if (is_posix) {
+  import("//build/tools/makefile.gni")
+}
+
 # help to build cmake projects
 import("//build/tools/cmake.gni")
 
