@@ -79,7 +79,7 @@ def main():
         is_debug == "true",
         static_link_crt == "true",
         boost_layout,
-        boost_shared_library
+        boost_shared_library == "true"
     )
 
 
