@@ -1,0 +1,51 @@
+assert(is_mac)
+
+template("app_bundle") {
+  assert(defined(invoker.sources), "Sources must be defined")
+  assert(defined(invoker.info_plist), "Info.plist must be defined")
+
+  app_name = target_name
+
+  bundle_data("${app_name}_bundle_info_plist") {
+    sources = [ invoker.info_plist ]
+    outputs = [ "{{bundle_contents_dir}}/Info.plist" ]
+  }
+
+  if (defined(invoker.resources) && invoker.resources != []) {
+    bundle_data("${app_name}_bundle_resources") {
+      sources = invoker.resources
+      outputs = [ "{{bundle_resources_dir}}/{{source_file_part}}" ]
+    }
+  }
+
+  executable("${app_name}_generate_executable") {
+    forward_variables_from(invoker, "*", [ "output_name" ])
+    output_name = "$app_name"
+  }
+
+  bundle_data("${app_name}_bundle_executable") {
+    public_deps = [ ":${app_name}_generate_executable" ]
+    sources = [ "$root_build_dir/$app_name" ]
+    outputs = [ "{{bundle_executable_dir}}/$app_name" ]
+  }
+
+  create_bundle("$app_name.app") {
+    product_type = "com.apple.product-type.application"
+
+    bundle_root_dir = "$root_build_dir/$target_name"
+    bundle_contents_dir = "$bundle_root_dir/Contents"
+    bundle_resources_dir = "$bundle_contents_dir/Resources"
+    bundle_executable_dir = "$bundle_contents_dir/MacOS"
+    deps = [
+      ":${app_name}_bundle_executable",
+      ":${app_name}_bundle_info_plist",
+    ]
+    if (defined(invoker.resources) && invoker.resources != []) {
+      deps += [ ":${app_name}_bundle_resources" ]
+    }
+  }
+
+  group("$app_name") {
+    deps = [ ":$app_name.app" ]
+  }
+}

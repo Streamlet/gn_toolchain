@@ -1,0 +1,15 @@
+assert(is_win)
+
+template("console_app") {
+  executable("$target_name") {
+    forward_variables_from(invoker, "*", [])
+    configs += [ "//build/config/win:console_subsystem" ]
+  }
+}
+
+template("win32_app") {
+  executable("$target_name") {
+    forward_variables_from(invoker, "*", [])
+    configs += [ "//build/config/win:windows_subsystem" ]
+  }
+}
