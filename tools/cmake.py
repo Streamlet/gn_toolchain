@@ -48,7 +48,7 @@ def cmake_build(
         options,
     )
     build_cmd = "cmake --build %s --config %s" % (build_dir, config)
-    install_cmd = "cmake --install %s  --config %s --prefix %s" % (
+    install_cmd = "cmake --install %s --config %s --prefix %s" % (
         build_dir,
         config,
         install_dir,

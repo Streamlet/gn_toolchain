@@ -33,9 +33,9 @@ def build_boost(
         libraries = " ".join(
             map(lambda item: "--with-" + item, boost_libraries.split(","))
         )
-    layout = ''
-    link = 'shared' if boost_shared_library else 'static'
-    if (len(boost_layout) > 0):
+    layout = ""
+    link = "shared" if boost_shared_library else "static"
+    if len(boost_layout) > 0:
         layout = "--layout=%s" % boost_layout
     action = "install" if len(boost_libraries) > 0 else "header"
     cmd = (
@@ -66,8 +66,8 @@ def main():
         target_cpu,  # "$target_cpu"
         is_debug,  # "$is_debug"
         static_link_crt,  # "$static_link_crt"
-        boost_layout, # "$boost_layout"
-        boost_shared_library # "$boost_shared_library"
+        boost_layout,  # "$boost_layout"
+        boost_shared_library,  # "$boost_shared_library"
     ] = sys.argv[1:]
 
     build_boost(
@@ -79,7 +79,7 @@ def main():
         is_debug == "true",
         static_link_crt == "true",
         boost_layout,
-        boost_shared_library == "true"
+        boost_shared_library == "true",
     )
 
 
