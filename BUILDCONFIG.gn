@@ -1,13 +1,4 @@
 # =============================================================================
-# BUILD FLAGS
-# =============================================================================
-
-declare_args() {
-  # Debug build
-  is_debug = false
-}
-
-# =============================================================================
 # PLATFORM SELECTION
 # =============================================================================
 
@@ -49,6 +40,27 @@ is_win = current_os == "win" || current_os == "winuwp"
 
 is_apple = is_ios || is_mac
 is_posix = !is_win && !is_fuchsia
+
+# =============================================================================
+# BUILD FLAGS
+# =============================================================================
+
+declare_args() {
+  # Debug build
+  is_debug = false
+}
+
+declare_args() {
+  c_std = "c17"
+  cc_std = "c++17"
+}
+
+declare_args() {
+  # for win only
+  use_ucrt = false  # whether to use the Universal CRT or not
+  static_link_crt = true  # static or dynamic link crt
+  winver = "0x0A00"  # use to define WINVER, _WIN32_WINNT and _WIN32_WINDOWS
+}
 
 # ==============================================================================
 # TOOLCHAIN SETUP
@@ -108,4 +120,10 @@ set_defaults("source_set") {
 # IMPORTS
 # =============================================================================
 
-import("//build/config/target_template.gni")
+if (is_mac) {
+  import("//build/config/mac/app_bundle.gni")
+}
+if (is_win) {
+  import("//build/config/win/application.gni")
+}
+import("//build/tools/cmake.gni")

@@ -1,11 +1,5 @@
 assert(is_win)
 
-declare_args() {
-  use_ucrt = false  # whether to use the Universal CRT or not
-  static_link_crt = true  # static or dynamic link crt
-  winver = "0x0A00"  # use to define WINVER, _WIN32_WINNT and _WIN32_WINDOWS
-}
-
 # =============================================================================
 # Default
 # =============================================================================
