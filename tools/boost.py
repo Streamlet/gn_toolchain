@@ -12,6 +12,7 @@ def build_boost(
     target_cpu,
     is_debug,
     static_link_crt,
+    boost_layout,
 ):
     build_dir = os.path.relpath(build_dir, boost_source_dir)
     install_dir = os.path.relpath(install_dir, boost_source_dir)
@@ -31,15 +32,18 @@ def build_boost(
         libraries = " ".join(
             map(lambda item: "--with-" + item, boost_libraries.split(","))
         )
-
+    layout = ''
+    if (len(boost_layout) > 0):
+        layout = "--layout=%s" % boost_layout
     action = "install" if len(boost_libraries) > 0 else "header"
     cmd = (
-        "%s --build-dir=%s --prefix=%s address-model=%d define=BOOST_AUTO_LINK_SYSTEM --layout=system %s variant=%s link=static threading=multi runtime-link=%s %s"
+        "%s --build-dir=%s --prefix=%s address-model=%d %s %s variant=%s link=static threading=multi runtime-link=%s %s"
         % (
             b2,
             build_dir,
             install_dir,
             address_model,
+            layout,
             libraries,
             variant,
             runtime_link,
@@ -59,6 +63,7 @@ def main():
         target_cpu,  # "$target_cpu"
         is_debug,  # "$is_debug"
         static_link_crt,  # "$static_link_crt"
+        layout, # "system"
     ] = sys.argv[1:]
 
     build_boost(
@@ -69,6 +74,7 @@ def main():
         target_cpu,
         is_debug == "true",
         static_link_crt == "true",
+        layout
     )
 
 
