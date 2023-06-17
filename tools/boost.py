@@ -25,7 +25,7 @@ def build_boost(
             os.system("bootstrap.bat")
         else:
             os.system("./bootstrap.sh")
-    runtime_link = "static" if static_link_crt else "dynamic"
+    runtime_link = "static" if sys.platform == 'win32' and static_link_crt else "dynamic"
     address_model = 32 if target_cpu == "x86" else 64
     variant = "debug" if is_debug else "release"
     libraries = ""
