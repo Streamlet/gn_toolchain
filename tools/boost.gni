@@ -1,0 +1,29 @@
+template("boost") {
+  # required: boost_source_dir, boost_outputs
+  # optional: boost_libraries, boost_build_dir, boost_install_dir
+  action("$target_name") {
+    boost_libraries = []
+    boost_build_dir = target_out_dir + "/" + target_name
+    boost_install_dir = root_out_dir + "/" + target_name
+    forward_variables_from(invoker,
+                           "*",
+                           [
+                             "script",
+                             "args",
+                             "input",
+                             "output_name",
+                           ])
+    script = "//build/tools/boost.py"
+    args = [
+      rebase_path(boost_source_dir, root_build_dir),
+      string_join(",", boost_libraries) + " ",
+      rebase_path(boost_build_dir, root_build_dir),
+      rebase_path(boost_install_dir, root_build_dir),
+      "$target_cpu",
+      "$is_debug",
+      "$static_link_crt",
+    ]
+    inputs = [ rebase_path(boost_source_dir, root_build_dir) ]
+    outputs = boost_outputs
+  }
+}

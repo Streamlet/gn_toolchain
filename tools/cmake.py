@@ -63,8 +63,8 @@ def main():
     [
         cmake_root,  # rebase_path(cmake_root, root_build_dir)
         cmake_options,  # string_join(",", cmake_options)
-        build_dir,  # rebase_path(target_out_dir, root_build_dir)
-        install_dir,  # rebase_path(target_gen_dir, root_build_dir)
+        build_dir,  # rebase_path(target_out_dir, root_build_dir) + "/$target_name"
+        install_dir,  # rebase_path(root_out_dir, root_build_dir) + "/$target_name"
         target_cpu,  # "$target_cpu"
         is_debug,  # "$is_debug"
         static_link_crt,  # "$static_link_crt"

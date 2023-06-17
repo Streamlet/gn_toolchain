@@ -123,7 +123,13 @@ set_defaults("source_set") {
 if (is_mac) {
   import("//build/config/mac/app_bundle.gni")
 }
+
 if (is_win) {
   import("//build/config/win/application.gni")
 }
+
+# help to build cmake projects
 import("//build/tools/cmake.gni")
+
+# help to build boost
+import("//build/tools/boost.gni")
