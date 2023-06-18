@@ -5,7 +5,7 @@ template("makefile") {
     makefile_config_cmd = "./configure"
     makefile_prefix = root_out_dir + "/" + target_name
     makefile_options = []
-    makefile_target = []
+    makefile_targets = []
     forward_variables_from(invoker,
                            "*",
                            [
@@ -20,9 +20,10 @@ template("makefile") {
       "$makefile_config_cmd",
       rebase_path(makefile_prefix, root_build_dir),
       string_join(",", makefile_options) + " ",
-      string_join(",", makefile_target) + " ",
+      string_join(",", makefile_targets) + " ",
     ]
-    inputs = [ rebase_path(makefile_root_dir, root_build_dir) + "/$makefile_config_cmd" ]
+    inputs = [ rebase_path(makefile_root_dir, root_build_dir) +
+               "/$makefile_config_cmd" ]
     outputs = makefile_outputs
   }
 }
