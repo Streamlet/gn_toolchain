@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import os, sys
+import os
+import sys
 
 
 def cmake_build(
@@ -25,7 +26,7 @@ def cmake_build(
             crt_link_flags,
         )
     elif sys.platform == "darwin":
-        arch = "-D CMAKE_OSX_ARCHITECTURES " + (
+        arch = "-DCMAKE_OSX_ARCHITECTURES=" + (
             "i386" if target_cpu == "x86" else "x86_64"
         )
         init_cflags = ""
@@ -38,7 +39,8 @@ def cmake_build(
         )
     options = ""
     if len(cmake_options) > 0:
-        options = " ".join(map(lambda item: "-D" + item, cmake_options.split(",")))
+        options = " ".join(
+            map(lambda item: "-D" + item, cmake_options.split(",")))
     config_cmd = "cmake %s %s -S %s -B %s %s" % (
         arch,
         init_cflags,
@@ -62,8 +64,10 @@ def main():
     [
         cmake_root,  # rebase_path(cmake_root, root_build_dir)
         cmake_options,  # string_join(",", cmake_options)
-        build_dir,  # rebase_path(target_out_dir, root_build_dir) + "/$target_name"
-        install_dir,  # rebase_path(root_out_dir, root_build_dir) + "/$target_name"
+        # rebase_path(target_out_dir, root_build_dir) + "/$target_name"
+        build_dir,
+        # rebase_path(root_out_dir, root_build_dir) + "/$target_name"
+        install_dir,
         target_cpu,  # "$target_cpu"
         is_debug,  # "$is_debug"
         static_link_crt,  # "$static_link_crt"
