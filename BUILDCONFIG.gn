@@ -138,3 +138,6 @@ import("//build/tools/cmake.gni")
 
 # help to build boost
 import("//build/tools/boost.gni")
+
+# help to build golang projects
+import("//build/tools/golang.gni")

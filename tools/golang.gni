@@ -1,0 +1,25 @@
+template("golang") {
+  # required: go_root_dir, go_outputs
+  # optional: go_gcflags, go_ldflags, go_out_dir
+  action("$target_name") {
+    go_gcflags = []
+    go_ldflags = []
+    go_out_dir = root_out_dir
+    forward_variables_from(invoker,
+                           "*",
+                           [
+                             "script",
+                             "args",
+                             "output_name",
+                           ])
+    script = "//build/tools/golang.py"
+    args = [
+      rebase_path(go_root_dir, root_build_dir),
+      rebase_path(go_out_dir, root_build_dir),
+      string_join(",", go_gcflags) + " ",
+      string_join(",", go_ldflags) + " ",
+      "$is_debug",
+    ]
+    outputs = go_outputs
+  }
+}
