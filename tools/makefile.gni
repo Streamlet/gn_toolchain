@@ -22,7 +22,7 @@ template("makefile") {
       string_join(",", makefile_options) + " ",
       string_join(",", makefile_target) + " ",
     ]
-    inputs = [ rebase_path(makefile_root_dir, root_build_dir) + "/Makefile" ]
+    inputs = [ rebase_path(makefile_root_dir, root_build_dir) + "/$makefile_config_cmd" ]
     outputs = makefile_outputs
   }
 }
