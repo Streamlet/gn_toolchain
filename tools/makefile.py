@@ -16,7 +16,7 @@ def makefile_build(
     options = ""
     if len(makefile_options) > 0:
         options = " ".join(map(lambda item: item, makefile_options.split(",")))
-    targets = [""]
+    targets = []
     if len(makefile_targets) > 0:
         targets = makefile_targets.split(",")
 
