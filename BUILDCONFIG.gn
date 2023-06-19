@@ -120,24 +120,29 @@ set_defaults("source_set") {
 # IMPORTS
 # =============================================================================
 
-if (is_mac) {
-  import("//build/config/mac/app_bundle.gni")
+# set environment variables for msvc build tools
+if (is_win) {
+  import("config/win/setup_environment.gni")
 }
 
+# help to build mac app bundle
+if (is_mac) {
+  import("config/mac/app_bundle.gni")
+}
+
+# help to specify subsystem explicitly to build win32 application or console application
 if (is_win) {
-  import("//build/config/win/application.gni")
+  import("config/win/application.gni")
 }
 
 # help to build makefile projects
-if (is_posix) {
-  import("//build/tools/makefile.gni")
-}
+import("tools/makefile.gni")
 
 # help to build cmake projects
-import("//build/tools/cmake.gni")
+import("tools/cmake.gni")
 
 # help to build boost
-import("//build/tools/boost.gni")
+import("tools/boost.gni")
 
 # help to build golang projects
-import("//build/tools/golang.gni")
+import("tools/golang.gni")

@@ -11,8 +11,10 @@ def makefile_build(
     makefile_prefix,
     makefile_options,
     makefile_targets,
+    makefile_env,
 ):
     prefix = os.path.abspath(makefile_prefix)
+    env = os.path.abspath(makefile_env)
     options = ""
     if len(makefile_options) > 0:
         options = " ".join(map(lambda item: item, makefile_options.split(",")))
@@ -30,15 +32,27 @@ def makefile_build(
     print(config_cmd)
     sys.stdout.flush()
     os.system(config_cmd)
-    os.system('touch "%s"' % os.path.join(prefix, "configure"))
+    os.system('echo > "%s"' % os.path.join(prefix, "configure"))
 
+    make = "make" if sys.platform != "win32" else ("ninja -t msvc -e %s -- nmake" % env)
     for target in targets:
-        make_cmd = "make %s" % target
+        make_cmd = "%s %s" % (make, target)
         print(make_cmd)
         sys.stdout.flush()
         os.system(make_cmd)
-        os.system('touch "%s"' % os.path.join(prefix, "make" +
-                  ("" if len(target) == 0 else "_"+target.replace(os.path.sep, '_'))))
+        os.system(
+            'echo > "%s"'
+            % os.path.join(
+                prefix,
+                "make"
+                + (
+                    ""
+                    if len(target) == 0
+                    else "_"
+                    + target.replace("/", "_").replace("\\", "_").replace(".", "_")
+                ),
+            )
+        )
 
 
 def main():
@@ -48,6 +62,7 @@ def main():
         makefile_prefix,  # rebase_path(makefile_prefix, root_build_dir),
         makefile_options,  # string_join(",", makefile_options) + " ",
         makefile_targets,  # string_join(",", makefile_target) + " ",
+        makefile_env,  # "$makefile_env"
     ] = sys.argv[1:]
 
     makefile_build(
@@ -56,6 +71,7 @@ def main():
         makefile_prefix,
         makefile_options.strip(),
         makefile_targets.strip(),
+        makefile_env,
     )
 
 

@@ -23,7 +23,7 @@ template("cmake") {
       "$is_debug",
       "$static_link_crt",
     ]
-    inputs = [ rebase_path(cmake_root_dir, root_build_dir) + "/CMakeLists.txt" ]
+    inputs = [ cmake_root_dir ]
     outputs = cmake_outputs
   }
 }
