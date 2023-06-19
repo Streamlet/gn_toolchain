@@ -37,9 +37,9 @@ def cmake_build(
             address_model,
             address_model,
         )
-    options = ""
+    options = "-DCMAKE_INSTALL_PREFIX=%s" % install_dir
     if len(cmake_options) > 0:
-        options = " ".join(
+        options += " " + " ".join(
             map(lambda item: "-D" + item, cmake_options.split(",")))
     config_cmd = "cmake %s %s -S %s -B %s %s" % (
         arch,
