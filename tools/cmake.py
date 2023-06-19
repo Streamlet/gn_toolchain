@@ -15,35 +15,30 @@ def cmake_build(
     static_link_crt,
 ):
     config = "debug" if is_debug else "release"
+    options = ""
     if sys.platform == "win32":
-        arch = "-A " + ("Win32" if target_cpu == "x86" else "x64")
-        if is_debug:
-            crt_link_flags = "/MTd" if static_link_crt else "/MDd"
-        else:
-            crt_link_flags = "/MT" if static_link_crt else "/MD"
-        init_cflags = "-DCMAKE_C_FLAGS_INIT=%s -DCMAKE_CXX_FLAGS_INIT=%s" % (
-            crt_link_flags,
-            crt_link_flags,
+        options += "-A %s " % ("Win32" if target_cpu == "x86" else "x64")
+        crt_link_flags = "MultiThreaded%s%s" % (
+            "Debug" if is_debug else "",
+            "" if static_link_crt else "DLL",
         )
+        options += "-DCMAKE_MSVC_RUNTIME_LIBRARY=%s " % (crt_link_flags,)
     elif sys.platform == "darwin":
-        arch = "-DCMAKE_OSX_ARCHITECTURES=" + (
-            "i386" if target_cpu == "x86" else "x86_64"
+        options += (
+            "-DCMAKE_OSX_ARCHITECTURES=%s " % "i386"
+            if target_cpu == "x86"
+            else "x86_64"
         )
-        init_cflags = ""
     else:
         address_model = "-m32" if target_cpu == "x86" else "-m64"
-        arch = ""
-        init_cflags = "-DCMAKE_C_FLAGS_INIT=%s -DCMAKE_CXX_FLAGS_INIT=%s" % (
+        options += "-DCMAKE_C_FLAGS_INIT=%s -DCMAKE_CXX_FLAGS_INIT=%s " % (
             address_model,
             address_model,
         )
-    options = "-DCMAKE_INSTALL_PREFIX=%s" % install_dir
+    options += "-DCMAKE_INSTALL_PREFIX=%s " % install_dir
     if len(cmake_options) > 0:
-        options += " " + " ".join(
-            map(lambda item: "-D" + item, cmake_options.split(",")))
-    config_cmd = "cmake %s %s -S %s -B %s %s" % (
-        arch,
-        init_cflags,
+        options += " ".join(map(lambda item: "-D" + item, cmake_options.split(",")))
+    config_cmd = "cmake -S %s -B %s %s" % (
         cmake_root,
         build_dir,
         options,
