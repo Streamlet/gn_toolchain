@@ -27,7 +27,7 @@ template("boost") {
       "$boost_layout",
       "$boost_shared_library",
     ]
-    inputs = [ rebase_path(boost_source_dir, root_build_dir) ]
+    inputs = [ boost_source_dir ]
     outputs = boost_outputs
   }
 }
