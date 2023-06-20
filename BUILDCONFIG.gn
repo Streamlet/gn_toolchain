@@ -86,6 +86,7 @@ if (is_posix) {
   _compile_defaults += [
     "//build/config/posix:default",
     "//build/config/posix:optmize",
+    "//build/config/posix:target_arch",
   ]
 }
 
