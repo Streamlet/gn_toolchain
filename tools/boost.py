@@ -38,8 +38,11 @@ def build_boost(
     if len(boost_layout) > 0:
         layout = "--layout=%s" % boost_layout
     action = "install" if len(boost_libraries) > 0 else "header"
+    cflags = ""
+    if sys.platform == "linux":
+        cflags = "cflags=-fPIC cxxflags=-fPIC"
     cmd = (
-        "%s --build-dir=%s --prefix=%s address-model=%d %s %s variant=%s link=%s threading=multi runtime-link=%s %s"
+        "%s --build-dir=%s --prefix=%s address-model=%d %s %s variant=%s link=%s threading=multi runtime-link=%s %s %s"
         % (
             b2,
             build_dir,
@@ -50,6 +53,7 @@ def build_boost(
             variant,
             link,
             runtime_link,
+            cflags,
             action,
         )
     )

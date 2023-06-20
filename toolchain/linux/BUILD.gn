@@ -62,6 +62,7 @@ toolchain("gcc") {
     rspfile_content = "-Wl,--whole-archive {{inputs}} {{solibs}} -Wl,--no-whole-archive {{libs}} -Wl,--whole-archive {{rlibs}} -Wl,--no-whole-archive"
     description = "SOLINK $sofile"
     default_output_dir = "{{root_out_dir}}"
+    default_output_extension = ".so"
     output_prefix = "lib"
 
     # Since the above commands only updates the .TOC file when it changes, ask
@@ -87,6 +88,7 @@ toolchain("gcc") {
     rspfile_content = "$whole_archive_flag {{inputs}} {{solibs}} $no_whole_archive_flag {{libs}} $whole_archive_flag {{rlibs}} $no_whole_archive_flag"
     description = "SOLINK_MODULE $sofile"
     default_output_dir = "{{root_out_dir}}"
+    default_output_extension = ".so"
     output_prefix = "lib"
     outputs = [ sofile ]
   }
