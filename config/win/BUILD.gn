@@ -54,11 +54,17 @@ config("optmize") {
   cflags = []
   if (is_debug) {
     cflags += [
-      "/JMC",
       "/Od",
       "/RTC1",
-      "/ZI",
     ]
+    if (vs_version > 80) {
+      cflags += [
+        "/JMC",
+        "/ZI",
+      ]
+    } else {
+      cflags += [ "/Zi" ]
+    }
   } else {
     cflags += [
       "/GL",
@@ -84,6 +90,11 @@ config("optmize") {
     if (target_cpu == "x86") {
       ldflags += [ "/SAFESEH" ]
     }
+  }
+
+  arflags = []
+  if (!is_debug) {
+    arflags += [ "/LTCG" ]
   }
 }
 
@@ -193,6 +204,7 @@ config("win_macros") {
     "WINAPI_FAMILY=100",  # Windows Desktop Applications
     "_CRT_NONSTDC_NO_DEPRECATE",
     "_CRT_NONSTDC_NO_WARNINGS",
+    "_CRT_SECURE_NO_DEPRECATE",
     "_CRT_SECURE_NO_WARNINGS",
   ]
 }
@@ -204,9 +216,11 @@ config("win_macros") {
 config("target_arch") {
   if (target_cpu == "x86") {
     ldflags = [ "/MACHINE:X86" ]
+    arflags = [ "/MACHINE:X86" ]
   } else {
     assert(vs_version > 71)
     ldflags = [ "/MACHINE:X64" ]
+    arflags = [ "/MACHINE:X64" ]
   }
 }
 
@@ -217,15 +231,19 @@ config("target_arch") {
 config("console_subsystem") {
   if (target_cpu == "x86") {
     ldflags = [ "/SUBSYSTEM:CONSOLE,5.01" ]
+    arflags = [ "/SUBSYSTEM:CONSOLE,5.01" ]
   } else {
     ldflags = [ "/SUBSYSTEM:CONSOLE,5.02" ]
+    arflags = [ "/SUBSYSTEM:CONSOLE,5.02" ]
   }
 }
 
 config("windows_subsystem") {
   if (target_cpu == "x86") {
     ldflags = [ "/SUBSYSTEM:WINDOWS,5.01" ]
+    arflags = [ "/SUBSYSTEM:WINDOWS,5.01" ]
   } else {
     ldflags = [ "/SUBSYSTEM:WINDOWS,5.02" ]
+    arflags = [ "/SUBSYSTEM:WINDOWS,5.02" ]
   }
 }
