@@ -22,14 +22,14 @@ config("default") {
     "/Zc:wchar_t",
     "/Zl",
   ]
-  if (vs_version > 71) {
+  if (vs_version >= 80) {
     cflags += [
       "/analyze-",
       "/bigobj",
       "/fp:precise",
     ]
   }
-  if (vs_version > 80) {
+  if (vs_version >= 90) {
     cflags += [
       "/analyze-",
       "/bigobj",
@@ -57,7 +57,7 @@ config("optmize") {
       "/Od",
       "/RTC1",
     ]
-    if (vs_version > 80) {
+    if (vs_version >= 100) {
       cflags += [
         "/JMC",
         "/ZI",
