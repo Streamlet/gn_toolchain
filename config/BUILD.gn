@@ -13,8 +13,10 @@ config("default") {
   }
 
   if (is_win) {
-    cflags_c = [ "/std:$c_std" ]
-    cflags_cc = [ "/std:$cc_std" ]
+    if (vs_version > 71) {
+      cflags_c = [ "/std:$c_std" ]
+      cflags_cc = [ "/std:$cc_std" ]
+    }
   } else {
     cflags_c = [ "-std=$c_std" ]
     cflags_cc = [ "-std=$cc_std" ]

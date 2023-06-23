@@ -1,7 +1,18 @@
 assert(is_win)
 
-exec_script("setup_environment.py",
-            [
-              host_cpu,
-              target_cpu,
-            ])
+declare_args() {
+  vs_version = ""
+  clang_installed = false
+  msvc_installed = false
+}
+
+env = exec_script("setup_environment.py",
+                  [
+                    host_cpu,
+                    target_cpu,
+                  ],
+                  "scope")
+
+vs_version = env.VERSION
+clang_installed = env.CLANG
+msvc_installed = env.MSVC

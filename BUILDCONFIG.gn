@@ -71,6 +71,8 @@ if (is_linux) {
 } else if (is_mac) {
   set_default_toolchain("//build/toolchain/mac:clang")
 } else if (is_win) {
+  # set environment variables for msvc build tools
+  import("config/win/setup_environment.gni")
   set_default_toolchain("//build/toolchain/win:msvc")
 } else {
   assert(false, "Unsupported target_os: $target_os")
@@ -120,11 +122,6 @@ set_defaults("source_set") {
 # =============================================================================
 # IMPORTS
 # =============================================================================
-
-# set environment variables for msvc build tools
-if (is_win) {
-  import("config/win/setup_environment.gni")
-}
 
 # help to build mac app bundle
 if (is_mac) {

@@ -11,10 +11,7 @@ config("default") {
   ]
 
   cflags = [
-    "/analyze-",
-    "/bigobj",
     "/EHsc",
-    "/fp:precise",
     "/Gd",
     "/Gm-",
     "/GS",
@@ -22,18 +19,27 @@ config("default") {
     "/W3",
     "/WX-",
     "/Zc:forScope",
-    "/Zc:inline",
     "/Zc:wchar_t",
     "/Zl",
-    "/utf-8",
   ]
+
+  if (vs_version > 71) {
+    cflags += [
+      "/analyze-",
+      "/bigobj",
+      "/fp:precise",
+      "/Zc:inline",
+      "/utf-8",
+    ]
+  }
 
   cflags_cc = [ "/EHsc" ]
 
-  ldflags = [
-    "/DEBUG",
-    "/MANIFEST:EMBED",
-  ]
+  ldflags = [ "/DEBUG" ]
+
+  if (vs_version > 71) {
+    ldflags += [ "/MANIFEST:EMBED" ]
+  }
 }
 
 # =============================================================================
@@ -63,10 +69,14 @@ config("optmize") {
   if (!is_debug) {
     ldflags += [
       "/INCREMENTAL:NO",
-      "/LTCG:incremental",
       "/OPT:ICF",
       "/OPT:REF",
     ]
+    if (vs_version > 71) {
+      ldflags += [ "/LTCG:incremental" ]
+    } else {
+      ldflags += [ "/LTCG" ]
+    }
     if (target_cpu == "x86") {
       ldflags += [ "/SAFESEH" ]
     }
@@ -99,8 +109,10 @@ config("crt_link") {
       libs += [
         "libcmtd.lib",
         "libcpmtd.lib",
-        "libvcruntimed.lib",
       ]
+      if (vs_version > 71) {
+        libs += [ "libvcruntimed.lib" ]
+      }
       if (use_ucrt) {
         libs += [ "libucrtd.lib" ]
       }
@@ -108,8 +120,10 @@ config("crt_link") {
       libs += [
         "libcmt.lib",
         "libcpmt.lib",
-        "libvcruntime.lib",
       ]
+      if (vs_version > 71) {
+        libs += [ "libvcruntime.lib" ]
+      }
       if (use_ucrt) {
         libs += [ "libucrt.lib" ]
       }
@@ -119,8 +133,10 @@ config("crt_link") {
       libs += [
         "msvcrtd.lib",
         "msvcprtd.lib",
-        "vcruntimed.lib",
       ]
+      if (vs_version > 71) {
+        libs += [ "vcruntimed.lib" ]
+      }
       if (use_ucrt) {
         libs += [ "ucrtd.lib" ]
       }
@@ -128,8 +144,10 @@ config("crt_link") {
       libs += [
         "msvcrt.lib",
         "msvcprt.lib",
-        "vcruntime.lib",
       ]
+      if (vs_version > 71) {
+        libs += [ "vcruntime.lib" ]
+      }
       if (use_ucrt) {
         libs += [ "ucrt.lib" ]
       }
@@ -183,6 +201,7 @@ config("target_arch") {
   if (target_cpu == "x86") {
     ldflags = [ "/MACHINE:X86" ]
   } else {
+    assert(vs_version > 71)
     ldflags = [ "/MACHINE:X64" ]
   }
 }
