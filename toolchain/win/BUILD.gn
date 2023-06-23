@@ -31,7 +31,7 @@ toolchain("msvc") {
     description = "CC {{output}}"
     outputs = [ "$object_subdir/{{source_name_part}}.obj" ]
 
-    if (vs_version > 80) {
+    if (vs_version >= 100) {
       command = "$env_wrappper $cl /c {{source}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} /Fo{{output}} /Fd\"$pdbname\" /FS"
     } else {
       command = "$env_wrappper $cl /c {{source}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} /Fo{{output}} /Fd\"$pdbname\""
@@ -48,14 +48,14 @@ toolchain("msvc") {
     description = "CXX {{output}}"
     outputs = [ "$object_subdir/{{source_name_part}}.obj" ]
 
-    if (vs_version > 80) {
+    if (vs_version >= 100) {
       command = "$env_wrappper $cl /Zi /c {{source}} /Fo{{output}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} /Fd\"$pdbname\" /FS"
     } else {
       command = "$env_wrappper $cl /Zi /c {{source}} /Fo{{output}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} /Fd\"$pdbname\""
     }
   }
   tool("rc") {
-    if (vs_version > 80) {
+    if (vs_version >= 100) {
       command = "$env_wrappper $rc /nologo {{defines}} {{include_dirs}} /fo{{output}} {{source}}"
     } else {
       command = "$env_wrappper $rc {{defines}} {{include_dirs}} /fo{{output}} {{source}}"

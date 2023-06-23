@@ -41,7 +41,7 @@ config("default") {
 
   ldflags = [ "/DEBUG" ]
 
-  if (vs_version > 80) {
+  if (vs_version >= 100) {
     ldflags += [ "/MANIFEST:EMBED" ]
   }
 }
@@ -82,7 +82,7 @@ config("optmize") {
       "/OPT:ICF",
       "/OPT:REF",
     ]
-    if (vs_version > 80) {
+    if (vs_version >= 100) {
       ldflags += [ "/LTCG:incremental" ]
     } else {
       ldflags += [ "/LTCG" ]
@@ -125,7 +125,7 @@ config("crt_link") {
         "libcmtd.lib",
         "libcpmtd.lib",
       ]
-      if (vs_version > 80) {
+      if (vs_version >= 100) {
         libs += [ "libvcruntimed.lib" ]
       }
       if (use_ucrt) {
@@ -136,7 +136,7 @@ config("crt_link") {
         "libcmt.lib",
         "libcpmt.lib",
       ]
-      if (vs_version > 80) {
+      if (vs_version >= 100) {
         libs += [ "libvcruntime.lib" ]
       }
       if (use_ucrt) {
@@ -149,7 +149,7 @@ config("crt_link") {
         "msvcrtd.lib",
         "msvcprtd.lib",
       ]
-      if (vs_version > 80) {
+      if (vs_version >= 100) {
         libs += [ "vcruntimed.lib" ]
       }
       if (use_ucrt) {
@@ -160,7 +160,7 @@ config("crt_link") {
         "msvcrt.lib",
         "msvcprt.lib",
       ]
-      if (vs_version > 80) {
+      if (vs_version >= 100) {
         libs += [ "vcruntime.lib" ]
       }
       if (use_ucrt) {

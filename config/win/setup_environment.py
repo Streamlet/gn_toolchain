@@ -69,12 +69,12 @@ def DetectSetEnvBatchFileByVCCommonToolsEnvVar(host_cpu, target_cpu):
     vs_versions = sorted(vs_versions,
                          key=lambda item: item[0], reverse=True)
     for (version, path) in vs_versions:
-        if version <= VS_2008_VERSION:
+        if version > VS_2003_VERSION:
             batch_file = os.path.join(
                 path, '..', '..', 'VC', 'vcvarsall.bat')
             if os.path.exists(batch_file):
                 return version, '"' + batch_file + '" ' + target_cpu
-        elif version <= VS_2005_VERSION:
+        else:
             batch_file = os.path.join(path, 'vsvars32.bat')
             if os.path.exists(batch_file):
                 return version, '"' + batch_file + '"'
