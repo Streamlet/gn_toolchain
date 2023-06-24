@@ -57,7 +57,7 @@ config("optmize") {
       "/Od",
       "/RTC1",
     ]
-    if (vs_version >= 110) {
+    if (vs_version >= 120) {
       cflags += [
         "/JMC",
         "/ZI",
