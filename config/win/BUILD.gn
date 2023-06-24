@@ -57,7 +57,7 @@ config("optmize") {
       "/Od",
       "/RTC1",
     ]
-    if (vs_version >= 120) {
+    if (vs_version >= 140) {
       cflags += [
         "/JMC",
         "/ZI",
@@ -82,7 +82,7 @@ config("optmize") {
       "/OPT:ICF",
       "/OPT:REF",
     ]
-    if (vs_version >= 120) {
+    if (vs_version >= 140) {
       ldflags += [ "/LTCG:incremental" ]
     } else {
       ldflags += [ "/LTCG" ]
@@ -125,22 +125,22 @@ config("crt_link") {
         "libcmtd.lib",
         "libcpmtd.lib",
       ]
-      if (vs_version >= 110) {
+      if (vs_version >= 140) {
         libs += [ "libvcruntimed.lib" ]
-      }
-      if (vs_version >= 140 && use_ucrt) {
-        libs += [ "libucrtd.lib" ]
+        if (use_ucrt) {
+          libs += [ "libucrtd.lib" ]
+        }
       }
     } else {
       libs += [
         "libcmt.lib",
         "libcpmt.lib",
       ]
-      if (vs_version >= 140 && vs_version >= 110) {
+      if (vs_version >= 140) {
         libs += [ "libvcruntime.lib" ]
-      }
-      if (use_ucrt) {
-        libs += [ "libucrt.lib" ]
+        if (use_ucrt) {
+          libs += [ "libucrt.lib" ]
+        }
       }
     }
   } else {
@@ -149,22 +149,22 @@ config("crt_link") {
         "msvcrtd.lib",
         "msvcprtd.lib",
       ]
-      if (vs_version >= 110) {
+      if (vs_version >= 140) {
         libs += [ "vcruntimed.lib" ]
-      }
-      if (vs_version >= 140 && use_ucrt) {
-        libs += [ "ucrtd.lib" ]
+        if (use_ucrt) {
+          libs += [ "ucrtd.lib" ]
+        }
       }
     } else {
       libs += [
         "msvcrt.lib",
         "msvcprt.lib",
       ]
-      if (vs_version >= 140 && vs_version >= 110) {
+      if (vs_version >= 140) {
         libs += [ "vcruntime.lib" ]
-      }
-      if (use_ucrt) {
-        libs += [ "ucrt.lib" ]
+        if (use_ucrt) {
+          libs += [ "ucrt.lib" ]
+        }
       }
     }
   }
