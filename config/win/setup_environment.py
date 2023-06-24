@@ -33,7 +33,8 @@ def ExecuteCmd(cmd):
 
 def DetectSetEnvBatchFileByVSWhere(host_cpu, target_cpu):
     program_files_x86 = os.environ['ProgramFiles(x86)']
-    vswhere_path = '%s\\Microsoft Visual Studio\\Installer\\vswhere.exe' % program_files_x86
+    vswhere_path = os.path.join(
+        program_files_x86, 'Microsoft Visual Studio', 'Installer', 'vswhere.exe')
     if not os.path.exists(vswhere_path):
         return None, None
     cmd = '"%s" -latest -property installationPath' % vswhere_path
@@ -43,7 +44,8 @@ def DetectSetEnvBatchFileByVSWhere(host_cpu, target_cpu):
     vs_version = int(vs_version.split('.')[0] + '0')
     if vs_path is None:
         return None, None
-    batch_file = vs_path + '\\VC\\Auxiliary\\Build\\vcvarsall.bat'
+    batch_file = os.path.join(
+        vs_path, 'VC', 'Auxiliary', 'Build', 'vcvarsall.bat')
     if not os.path.exists(batch_file):
         return None, None
     if host_cpu == target_cpu:
@@ -75,7 +77,8 @@ def DetectSetEnvBatchFileByEnvVar(host_cpu, target_cpu):
 
 def DetectSetEnvBatchFileByFindVC6(host_cpu, target_cpu):
     program_files_x86 = os.environ['ProgramFiles(x86)']
-    batch_file = program_files_x86 + '\\Microsoft Visual Studio\\VC98\\Bin\\vcvars32.bat'
+    batch_file = os.path.join(
+        program_files_x86, + 'Microsoft Visual Studio', 'VC98', 'Bin', 'vcvars32.bat')
     if not os.path.exists(batch_file):
         return None, None
     return VC_60_VERSION, '"' + batch_file + '"'
