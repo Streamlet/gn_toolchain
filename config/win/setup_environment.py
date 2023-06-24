@@ -40,7 +40,7 @@ def DetectSetEnvBatchFileByVSWhere(host_cpu, target_cpu):
     vs_path = ExecuteCmd(cmd)
     cmd = '"%s" -latest -property installationVersion' % vswhere_path
     vs_version = ExecuteCmd(cmd)
-    vs_version = ''.join(vs_version.split('.')[:2])
+    vs_version = int(vs_version.split('.')[0] + '0')
     if vs_path is None:
         return None, None
     batch_file = vs_path + '\\VC\\Auxiliary\\Build\\vcvarsall.bat'
