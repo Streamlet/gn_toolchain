@@ -20,10 +20,9 @@ VS_2022_VERSION = 170
 
 def ExecuteCmd(cmd):
     encoding = locale.getpreferredencoding(False)
-    (stdoutdata, stderrdata) = subprocess.Popen(cmd,
-                                                stdout=subprocess.PIPE,
-                                                stderr=subprocess.STDOUT,
-                                                shell=True).communicate()
+    (stdoutdata, stderrdata) = subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True
+    ).communicate()
     if stderrdata is not None:
         print(stderrdata.decode(encoding))
         return False
@@ -33,30 +32,26 @@ def ExecuteCmd(cmd):
 
 def DetectSetEnvBatchFileByVSWhere(host_cpu, target_cpu):
     program_files_x86 = os.environ['ProgramFiles(x86)']
-    vswhere_path = '%s\\Microsoft Visual Studio\\Installer\\vswhere.exe' % program_files_x86
+    vswhere_path = (
+        '%s\\Microsoft Visual Studio\\Installer\\vswhere.exe' % program_files_x86
+    )
     if not os.path.exists(vswhere_path):
         return None, None
-    cmd = '"%s" -legacy -latest -property installationPath' % vswhere_path
+    cmd = '"%s" -latest -property installationPath' % vswhere_path
     vs_path = ExecuteCmd(cmd)
+    cmd = '"%s" -latest -property installationVersion' % vswhere_path
+    vs_version = ExecuteCmd(cmd)
+    vs_version = ''.join(vs_version.split('.')[:2])
     if vs_path is None:
         return None, None
-    BATCH_FILES = {
-        # host
-        'x64': {
-            # target
-            'x64': 'vcvars64.bat',
-            'x86': 'vcvarsamd64_x86.bat',
-        },
-        'x86': {
-            'x64': 'vcvarsx86_amd64.bat',
-            'x86': 'vcvars32.bat',
-        },
-    }
-    batch_file = vs_path + '\\VC\\Auxiliary\\Build\\' + \
-        BATCH_FILES[host_cpu][target_cpu]
+    batch_file = vs_path + '\\VC\\Auxiliary\\Build\\vcvarsall.bat'
     if not os.path.exists(batch_file):
         return None, None
-    return VS_2017_VERSION, '"' + batch_file + '"'
+    if host_cpu == target_cpu:
+        arch = target_cpu
+    else:
+        arch = host_cpu + '_' + target_cpu
+    return vs_version, '"' + batch_file + '" ' + arch
 
 
 def DetectSetEnvBatchFileByVCCommonToolsEnvVar(host_cpu, target_cpu):
@@ -66,12 +61,10 @@ def DetectSetEnvBatchFileByVCCommonToolsEnvVar(host_cpu, target_cpu):
         m = regex.match(vs.upper())
         if m:
             vs_versions.append((int(m.group(1)), os.environ[vs]))
-    vs_versions = sorted(vs_versions,
-                         key=lambda item: item[0], reverse=True)
-    for (version, path) in vs_versions:
+    vs_versions = sorted(vs_versions, key=lambda item: item[0], reverse=True)
+    for version, path in vs_versions:
         if version > VS_2003_VERSION:
-            batch_file = os.path.join(
-                path, '..', '..', 'VC', 'vcvarsall.bat')
+            batch_file = os.path.join(path, '..', '..', 'VC', 'vcvarsall.bat')
             if os.path.exists(batch_file):
                 return version, '"' + batch_file + '" ' + target_cpu
         else:
@@ -89,8 +82,16 @@ def SetupEnvironment(host_cpu, target_cpu):
     if cmd is None:
         assert False, 'Cannot fine Windows SDK SetEnvBatchFile'
     env_lines = ExecuteCmd(cmd + ' && Set')
-    ENV_VAR_TO_SAVE = ('INCLUDE', 'LIB', 'LIBPATH', 'PATH',
-                       'PATHEXT', 'SYSTEMROOT', 'TEMP', 'TMP')
+    ENV_VAR_TO_SAVE = (
+        'INCLUDE',
+        'LIB',
+        'LIBPATH',
+        'PATH',
+        'PATHEXT',
+        'SYSTEMROOT',
+        'TEMP',
+        'TMP',
+    )
     env = {}
     env_block = ''
     for line in env_lines.split('\n'):

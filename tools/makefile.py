@@ -15,16 +15,16 @@ def makefile_build(
 ):
     prefix = os.path.abspath(makefile_prefix)
     env = os.path.abspath(makefile_env)
-    options = ""
+    options = ''
     if len(makefile_options) > 0:
-        options = " ".join(map(lambda item: item, makefile_options.split(",")))
+        options = ' '.join(map(lambda item: item, makefile_options.split(',')))
     targets = []
     if len(makefile_targets) > 0:
-        targets = makefile_targets.split(",")
+        targets = makefile_targets.split(',')
 
     os.chdir(makefile_root_dir)
 
-    config_cmd = "%s --prefix=%s %s" % (
+    config_cmd = '%s --prefix=%s %s' % (
         makefile_config_cmd,
         prefix,
         options,
@@ -32,27 +32,17 @@ def makefile_build(
     print(config_cmd)
     sys.stdout.flush()
     os.system(config_cmd)
-    os.system('echo > "%s"' % os.path.join(prefix, "configure"))
+    os.system('echo > "%s"' % os.path.join(prefix, 'configure'))
 
-    make = "make" if sys.platform != "win32" else ("ninja -t msvc -e %s -- nmake" % env)
+    make = 'make' if sys.platform != 'win32' else (
+        'ninja -t msvc -e %s -- nmake' % env)
     for target in targets:
-        make_cmd = "%s %s" % (make, target)
+        make_cmd = '%s %s' % (make, target)
         print(make_cmd)
         sys.stdout.flush()
         os.system(make_cmd)
-        os.system(
-            'echo > "%s"'
-            % os.path.join(
-                prefix,
-                "make"
-                + (
-                    ""
-                    if len(target) == 0
-                    else "_"
-                    + target.replace("/", "_").replace("\\", "_").replace(".", "_")
-                ),
-            )
-        )
+        os.system('echo > "%s"' % os.path.join(prefix, 'make'
+                                               + ('' if len(target) == 0 else '_' + target.replace('/', '_').replace('\\', '_').replace('.', '_'))))
 
 
 def main():
@@ -75,5 +65,5 @@ def main():
     )
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
