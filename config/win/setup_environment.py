@@ -5,6 +5,7 @@ import subprocess
 import re
 
 
+VC_60_VERSION = 60
 VS_2002_VERSION = 70
 VS_2003_VERSION = 71
 VS_2005_VERSION = 80
@@ -32,9 +33,7 @@ def ExecuteCmd(cmd):
 
 def DetectSetEnvBatchFileByVSWhere(host_cpu, target_cpu):
     program_files_x86 = os.environ['ProgramFiles(x86)']
-    vswhere_path = (
-        '%s\\Microsoft Visual Studio\\Installer\\vswhere.exe' % program_files_x86
-    )
+    vswhere_path = '%s\\Microsoft Visual Studio\\Installer\\vswhere.exe' % program_files_x86
     if not os.path.exists(vswhere_path):
         return None, None
     cmd = '"%s" -latest -property installationPath' % vswhere_path
@@ -54,7 +53,7 @@ def DetectSetEnvBatchFileByVSWhere(host_cpu, target_cpu):
     return vs_version, '"' + batch_file + '" ' + arch
 
 
-def DetectSetEnvBatchFileByVCCommonToolsEnvVar(host_cpu, target_cpu):
+def DetectSetEnvBatchFileByEnvVar(host_cpu, target_cpu):
     regex = re.compile(r'VS(\d+)COMNTOOLS')
     vs_versions = []
     for vs in os.environ:
@@ -74,11 +73,20 @@ def DetectSetEnvBatchFileByVCCommonToolsEnvVar(host_cpu, target_cpu):
     return None, None
 
 
+def DetectSetEnvBatchFileByFindVC6(host_cpu, target_cpu):
+    program_files_x86 = os.environ['ProgramFiles(x86)']
+    batch_file = program_files_x86 + '\\Microsoft Visual Studio\\VC98\\Bin\\vcvars32.bat'
+    if not os.path.exists(batch_file):
+        return None, None
+    return VC_60_VERSION, '"' + batch_file + '"'
+
+
 def SetupEnvironment(host_cpu, target_cpu):
     version, cmd = DetectSetEnvBatchFileByVSWhere(host_cpu, target_cpu)
     if cmd is None:
-        version, cmd = DetectSetEnvBatchFileByVCCommonToolsEnvVar(
-            host_cpu, target_cpu)
+        version, cmd = DetectSetEnvBatchFileByEnvVar(host_cpu, target_cpu)
+    if cmd is None:
+        version, cmd = DetectSetEnvBatchFileByFindVC6(host_cpu, target_cpu)
     if cmd is None:
         assert False, 'Cannot fine Windows SDK SetEnvBatchFile'
     env_lines = ExecuteCmd(cmd + ' && Set')
