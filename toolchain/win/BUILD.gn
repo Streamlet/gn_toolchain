@@ -79,7 +79,7 @@ toolchain("msvc") {
       "{{output_dir}}/{{target_output_name}}.lib",
     ]
     default_output_extension = ".lib"
-    default_output_dir = "{{target_out_dir}}"
+    default_output_dir = "{{root_out_dir}}"
 
     # The use of inputs_newline is to work around a fixed per-line buffer
     # size in the linker.

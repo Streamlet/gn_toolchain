@@ -101,7 +101,7 @@ toolchain("clang") {
     }
 
     outputs = [ "{{output_dir}}/{{target_output_name}}{{output_extension}}" ]
-    default_output_dir = "{{target_out_dir}}"
+    default_output_dir = "{{root_out_dir}}"
     default_output_extension = ".a"
     output_prefix = "lib"
   }
