@@ -65,7 +65,7 @@ config("optmize") {
     if (vs_version >= 70) {
       cflags += [ "/RTC1" ]
     }
-    if (vs_version >= 140) {
+    if (vs_version >= 150) {
       cflags += [
         "/JMC",
         "/ZI",
