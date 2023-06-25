@@ -4,6 +4,7 @@
 import os
 import sys
 import zipfile
+import stat
 if sys.version >= '3':
     import urllib.request as urllib
 else:
@@ -42,30 +43,30 @@ def main():
 
     ninja_latest = os.path.basename(get_redirected_url(
         'https://github.com/ninja-build/ninja/releases/latest'))
+    url = {}
     if sys.platform == 'win32':
-        gn_url = 'https://chrome-infra-packages.appspot.com/dl/gn/gn/windows-amd64/+/latest'
-        ninja_url = 'https://github.com/ninja-build/ninja/releases/download/%s/ninja-win.zip' % ninja_latest
+        url['gn'] = 'https://chrome-infra-packages.appspot.com/dl/gn/gn/windows-amd64/+/latest'
+        url['ninja'] = 'https://github.com/ninja-build/ninja/releases/download/%s/ninja-win.zip' % ninja_latest
     elif sys.platform == 'darwin':
-        gn_url = 'https://chrome-infra-packages.appspot.com/dl/gn/gn/mac-amd64/+/latest'
-        ninja_url = 'https://github.com/ninja-build/ninja/releases/download/%s/ninja-mac.zip' % ninja_latest
+        url['gn'] = 'https://chrome-infra-packages.appspot.com/dl/gn/gn/mac-amd64/+/latest'
+        url['ninja'] = 'https://github.com/ninja-build/ninja/releases/download/%s/ninja-mac.zip' % ninja_latest
     elif sys.platform == 'linux':
-        gn_url = 'https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-amd64/+/latest'
-        ninja_url = 'https://github.com/ninja-build/ninja/releases/download/%s/ninja-linux.zip' % ninja_latest
+        url['gn'] = 'https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-amd64/+/latest'
+        url['ninja'] = 'https://github.com/ninja-build/ninja/releases/download/%s/ninja-linux.zip' % ninja_latest
     else:
         assert False, 'Unsupport system: %s' % sys.platform
 
-    gn_zip = os.path.join('bin', 'gn.zip')
-    ninja_zip = os.path.join('bin', 'ninja.zip')
-
-    download(gn_url, gn_zip)
-    with zipfile.ZipFile(gn_zip, 'r') as zip:
-        zip.extractall('bin')
-    os.remove(gn_zip)
-
-    download(ninja_url, ninja_zip)
-    with zipfile.ZipFile(ninja_zip, 'r') as zip:
-        zip.extractall('bin')
-    os.remove(ninja_zip)
+    for t in ('gn', 'ninja',):
+        z = os.path.join('bin', t + '.zip')
+        download(url[t], z)
+        with zipfile.ZipFile(z, 'r') as zip:
+            f = t + '.exe' if sys.platform == 'win32' else t
+            zip.extract(f, 'bin')
+            if sys.platform != 'win32':
+                p = os.path.join('bin', f)
+                st = os.stat(p)
+                os.chmod(p, st | stat.S_IEXEC)
+        os.remove(z)
 
 
 if __name__ == '__main__':
