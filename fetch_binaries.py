@@ -65,7 +65,7 @@ def main():
             if sys.platform != 'win32':
                 p = os.path.join('bin', f)
                 st = os.stat(p)
-                os.chmod(p, st | stat.S_IEXEC)
+                os.chmod(p, st.st_mode | stat.S_IEXEC)
         os.remove(z)
 
 
