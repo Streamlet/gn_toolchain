@@ -17,6 +17,7 @@ config("default") {
     "/Oy-",
     "/W3",
     "/WX-",
+    "/Zi",
     "/Zl",
   ]
   if (vs_version >= 70) {
@@ -65,20 +66,14 @@ config("optmize") {
     if (vs_version >= 70) {
       cflags += [ "/RTC1" ]
     }
-    if (vs_version >= 150) {
-      cflags += [
-        "/JMC",
-        "/ZI",
-      ]
-    } else {
-      cflags += [ "/Zi" ]
+    if (vs_version >= 158) {
+      cflags += [ "/JMC" ]
     }
   } else {
     cflags += [
       "/Gy",
       "/O2",
       "/Oi",
-      "/Zi",
     ]
     if (vs_version >= 70) {
       cflags += [ "/GL" ]

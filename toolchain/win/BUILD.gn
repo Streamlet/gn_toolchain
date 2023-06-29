@@ -49,9 +49,9 @@ toolchain("msvc") {
     outputs = [ "$object_subdir/{{source_name_part}}.obj" ]
 
     if (vs_version >= 120) {
-      command = "$env_wrappper $cl /Zi /c {{source}} /Fo{{output}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} /Fd\"$pdbname\" /FS"
+      command = "$env_wrappper $cl /c {{source}} /Fo{{output}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} /Fd\"$pdbname\" /FS"
     } else {
-      command = "$env_wrappper $cl /Zi /c {{source}} /Fo{{output}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} /Fd\"$pdbname\""
+      command = "$env_wrappper $cl /c {{source}} /Fo{{output}} /nologo {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} /Fd\"$pdbname\""
     }
   }
   tool("rc") {
