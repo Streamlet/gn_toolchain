@@ -45,7 +45,7 @@ def DetectSetEnvBatchFileByVSWhere(host_cpu, target_cpu):
     vs_version_string = ExecuteCmd(cmd)
     if vs_version_string is None or vs_version_string == '':
         return None, None
-    vs_version_part = map(lambda x: int(x), vs_version_string.split('.'))
+    vs_version_part = list(map(lambda x: int(x), vs_version_string.split('.')))
     if len(vs_version_part) < 2:
         return None, None
     vs_version = vs_version_part[0] * 10 + (min(vs_version_part[1], 9))
