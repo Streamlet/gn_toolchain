@@ -1,5 +1,7 @@
 # gn toolchain
 
+![Autobuild Status](https://github.com/Streamlet/gn_toolchain/actions/workflows/autobuild.yml/badge.svg)
+---
 [（中文版本见这里）](README_zh.md)
 
 This project provides a simple and out-of-the-box gn toolchain configuration, to make cross-platform compile easier under the gn+ninja build system.

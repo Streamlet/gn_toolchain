@@ -1,5 +1,7 @@
 # gn 工具链
 
+![Autobuild Status](https://github.com/Streamlet/gn_toolchain/actions/workflows/autobuild.yml/badge.svg)
+---
 [(Here is the English Version)](README.md)
 
 本项目旨在给出一个简单的、开箱即用的 gn 工具链配置，使得在 gn+ninja 构建系统下的跨平台编译变得更容易。
