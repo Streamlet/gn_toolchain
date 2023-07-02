@@ -21,7 +21,7 @@ template("makefile") {
     script = "//build/tools/makefile.py"
     args = [
       rebase_path(makefile_root_dir, root_build_dir),
-      "$makefile_config_cmd",
+      "$makefile_config_cmd ",
       rebase_path(makefile_prefix, root_build_dir),
       string_join(",", makefile_options) + " ",
       string_join(",", makefile_targets) + " ",
