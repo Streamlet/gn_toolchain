@@ -1,9 +1,11 @@
 template("makefile") {
   # required: makefile_root_dir, makefile_outputs
-  # optional: makefile_config_cmd, makefile_prefix, makefile_options, makefile_target, makefile_env
+  # optional: makefile_config_cmd, makefile_prefix, makefile_file, makefile_options, makefile_target, makefile_env
   action("$target_name") {
     makefile_config_cmd = "./configure"
     makefile_prefix = root_out_dir + "/" + target_name
+    makefile_config_options = []
+    makefile_file = ""
     makefile_options = []
     makefile_targets = [
       "",
@@ -23,9 +25,11 @@ template("makefile") {
       rebase_path(makefile_root_dir, root_build_dir),
       "$makefile_config_cmd ",
       rebase_path(makefile_prefix, root_build_dir),
+      string_join(",", makefile_config_options) + " ",
+      makefile_file + " ",
       string_join(",", makefile_options) + " ",
       string_join(",", makefile_targets) + " ",
-      makefile_env,
+      makefile_env + " ",
     ]
     inputs = [ makefile_root_dir ]
     outputs = makefile_outputs
