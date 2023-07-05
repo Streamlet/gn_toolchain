@@ -22,7 +22,7 @@ VS_2022_VERSION = 170
 def ExecuteCmd(cmd):
     encoding = locale.getpreferredencoding(False)
     (stdoutdata, stderrdata) = subprocess.Popen(
-        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
     ).communicate()
     if stderrdata is not None:
         print(stderrdata.decode(encoding))
