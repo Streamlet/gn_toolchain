@@ -1,4 +1,4 @@
-name: autobuild
+name: windows
 
 on:
   push:
@@ -9,24 +9,20 @@ on:
 jobs:
 
   build:
-    name: Build ${{ matrix.config }} on ${{ matrix.os }} with ${{ matrix.arch }} arch
+    name: ${{ matrix.os }} ${{ matrix.arch }} ${{ matrix.config }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        shell: bash
+        shell: cmd
     strategy:
       matrix:
-        os: [windows-latest, macOS-latest, ubuntu-latest]
+        os: [ windows-latest ]
         arch: [ x64, x86 ]
         config: [ debug, release ]
-        exclude:
-          - os: macOS-latest
-            arch: x86
-          - os: ubuntu-latest
-            arch: x86
+
     steps:
 
-    - name: Setup environment
+    - name: Setup python environment
       run: |
         pip install PyYAML
 
@@ -43,9 +39,9 @@ jobs:
 
     - name: Fetch gn and ninja
       run: |
-        python build/fetch_binaries.py
+        python build\\fetch_binaries.py
 
     - name: Compile
       run: |
-        build/bin/gn gen out/${{ matrix.config }}_${{ matrix.arch }} --args="target_cpu=\"${{ matrix.arch }}\" is_debug=${{ matrix.config == 'debug' }}"
-        build/bin/ninja -C out/${{ matrix.config }}_${{ matrix.arch }}
+        build\\bin\\gn gen out/${{ matrix.config }}_${{ matrix.arch }} --args="target_cpu=\"${{ matrix.arch }}\" is_debug=${{ matrix.config == 'debug' }}"
+        build\\bin\\ninja -C out/${{ matrix.config }}_${{ matrix.arch }}

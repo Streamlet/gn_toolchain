@@ -1,0 +1,44 @@
+name: linux
+
+on:
+  push:
+  pull_request:
+  release:
+    types: published
+
+jobs:
+
+  build:
+    name: ${{ matrix.os }} ${{ matrix.arch }} ${{ matrix.config }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        arch: [ x64 ]
+        config: [ debug, release ]
+
+    steps:
+
+    - name: Setup environment
+      run: |
+        pip install PyYAML
+
+    - name: Check out gn_toolchain_sample
+      uses: actions/checkout@v3
+      with:
+        repository: Streamlet/gn_toolchain_sample
+        ref: master
+
+    - name: Check out gn_toolchain
+      uses: actions/checkout@v3
+      with:
+        path: build
+
+    - name: Fetch gn and ninja
+      run: |
+        python build/fetch_binaries.py
+
+    - name: Compile
+      run: |
+        build/bin/gn gen out/${{ matrix.config }}_${{ matrix.arch }} --args="target_cpu=\"${{ matrix.arch }}\" is_debug=${{ matrix.config == 'debug' }}"
+        build/bin/ninja -C out/${{ matrix.config }}_${{ matrix.arch }}

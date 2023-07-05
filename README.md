@@ -1,6 +1,6 @@
 # gn toolchain
 
-![Autobuild Status](https://github.com/Streamlet/gn_toolchain/actions/workflows/autobuild.yml/badge.svg)
+![](https://github.com/Streamlet/gn_toolchain/actions/workflows/windows.yml/badge.svg) ![](https://github.com/Streamlet/gn_toolchain/actions/workflows/linux.yml/badge.svg) ![](https://github.com/Streamlet/gn_toolchain/actions/workflows/macos.yml/badge.svg)
 ---
 [（中文版本见这里）](README_zh.md)
 
