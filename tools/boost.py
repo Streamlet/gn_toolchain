@@ -16,8 +16,8 @@ def build_boost(
     boost_layout,
     boost_shared_library,
 ):
-    build_dir = os.path.relpath(build_dir, boost_source_dir)
-    install_dir = os.path.relpath(install_dir, boost_source_dir)
+    build_dir = os.path.abspath(build_dir, boost_source_dir)
+    install_dir = os.path.abspath(install_dir, boost_source_dir)
     os.chdir(boost_source_dir)
 
     b2 = 'b2.exe' if sys.platform == 'win32' else './b2'
