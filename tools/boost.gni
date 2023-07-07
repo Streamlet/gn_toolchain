@@ -1,10 +1,11 @@
 template("boost") {
   # required: boost_source_dir, boost_outputs
-  # optional: boost_libraries, boost_build_dir, boost_install_dir, boost_layout, boost_shared_library
+  # optional: boost_libraries, boost_build_dir, boost_install_dir, boost_install_headers, boost_layout, boost_shared_library
   action("$target_name") {
     boost_libraries = []
     boost_build_dir = target_out_dir + "/" + target_name
     boost_install_dir = root_out_dir + "/" + target_name
+    boost_install_headers = false
     boost_layout = ""
     boost_shared_library = false
     forward_variables_from(invoker,
@@ -21,10 +22,11 @@ template("boost") {
       string_join(",", boost_libraries) + " ",
       rebase_path(boost_build_dir, root_build_dir),
       rebase_path(boost_install_dir, root_build_dir),
-      "$target_cpu",
+      "$boost_install_headers",
+      target_cpu,
       "$is_debug",
       "$static_link_crt",
-      "$boost_layout",
+      boost_layout,
       "$boost_shared_library",
     ]
     inputs = [ boost_source_dir ]
