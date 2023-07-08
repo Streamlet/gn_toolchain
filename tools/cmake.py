@@ -22,7 +22,7 @@ def cmake_build(
             'Debug' if is_debug else '',
             '' if static_link_crt else 'DLL',
         )
-        options += '-DCMAKE_MSVC_RUNTIME_LIBRARY=%s ' % (crt_link_flags,)
+        options += '-DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY=%s ' % (crt_link_flags,)
     elif sys.platform == 'darwin':
         options += '-DCMAKE_OSX_ARCHITECTURES=%s ' % 'i386' if target_cpu == 'x86' else 'x86_64'
     else:
@@ -33,10 +33,10 @@ def cmake_build(
     if len(cmake_options) > 0:
         options += ' '.join(map(lambda item: '-D' + item,
                             cmake_options.split(',')))
-    config_cmd = 'cmake -S %s -B %s %s' % (
+    config_cmd = 'cmake %s -S %s -B %s' % (
+        options,
         cmake_root,
         build_dir,
-        options,
     )
     build_cmd = 'cmake --build %s --config %s' % (build_dir, config)
     install_cmd = 'cmake --install %s --config %s --prefix %s' % (
