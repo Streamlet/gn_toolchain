@@ -59,7 +59,7 @@ declare_args() {
   # for win only
   use_ucrt = false  # whether to use the Universal CRT or not
   static_link_crt = true  # static or dynamic link crt
-  winver = "0x0A00"  # use to define WINVER, _WIN32_WINNT and _WIN32_WINDOWS
+  winver = "0x0A00"  # use to define WINVER, _WIN32_WINNT, _WIN32_WINDOWS and NTDDI_VERSION
 }
 
 # ==============================================================================
