@@ -92,7 +92,7 @@ toolchain("msvc") {
     pdbname = "${dllname}.pdb"
     rspfile = "${dllname}.rsp"
 
-    command = "$env_wrappper $link /OUT:$dllname /nologo /IMPLIB:$libname /DLL /PDB:$pdbname @$rspfile"
+    command = "$env_wrappper $link {{ldflags}} /OUT:$dllname /nologo /IMPLIB:$libname /DLL /PDB:$pdbname @$rspfile"
 
     default_output_extension = ".dll"
     default_output_dir = "{{root_out_dir}}"
@@ -116,8 +116,7 @@ toolchain("msvc") {
 
     # The use of inputs_newline is to work around a fixed per-line buffer
     # size in the linker.
-    rspfile_content =
-        "{{libs}} {{solibs}} {{inputs_newline}} {{ldflags}} {{rlibs}}"
+    rspfile_content = "{{libs}} {{solibs}} {{inputs_newline}} {{rlibs}}"
   }
   tool("solink_module") {
     # E.g. "foo.dll":
@@ -125,8 +124,7 @@ toolchain("msvc") {
     pdbname = "${dllname}.pdb"
     rspfile = "${dllname}.rsp"
 
-    command =
-        "$env_wrappper $link /OUT:$dllname /nologo /DLL /PDB:$pdbname @$rspfile"
+    command = "$env_wrappper $link {{ldflags}} /OUT:$dllname /nologo /DLL /PDB:$pdbname @$rspfile"
 
     default_output_extension = ".dll"
     default_output_dir = "{{root_out_dir}}"
@@ -139,16 +137,14 @@ toolchain("msvc") {
 
     # The use of inputs_newline is to work around a fixed per-line buffer
     # size in the linker.
-    rspfile_content =
-        "{{libs}} {{solibs}} {{inputs_newline}} {{ldflags}} {{rlibs}}"
+    rspfile_content = "{{libs}} {{solibs}} {{inputs_newline}} {{rlibs}}"
   }
   tool("link") {
     exename = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
     pdbname = "$exename.pdb"
     rspfile = "$exename.rsp"
 
-    command =
-        "$env_wrappper $link /OUT:$exename /nologo /PDB:$pdbname @$rspfile"
+    command = "$env_wrappper $link {{ldflags}} /OUT:$exename /nologo /PDB:$pdbname @$rspfile"
 
     default_output_extension = ".exe"
     default_output_dir = "{{root_out_dir}}"
@@ -161,8 +157,7 @@ toolchain("msvc") {
 
     # The use of inputs_newline is to work around a fixed per-line buffer
     # size in the linker.
-    rspfile_content =
-        "{{inputs_newline}} {{libs}} {{solibs}} {{ldflags}} {{rlibs}}"
+    rspfile_content = "{{inputs_newline}} {{libs}} {{solibs}} {{rlibs}}"
   }
 
   # These two are really entirely generic, but have to be repeated in
