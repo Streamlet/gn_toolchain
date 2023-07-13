@@ -13,6 +13,14 @@ template("cmake") {
                              "input",
                              "output_name",
                            ])
+    toolset = ""
+    if (is_winxp) {
+      if (vs_version > 141) {
+        toolset = "v141_xp"
+      } else if (vs_version >= 110) {
+        toolset = "v${vs_version}_xp"
+      }
+    }
     script = "//build/tools/cmake.py"
     args = [
       rebase_path(cmake_root_dir, root_build_dir),
@@ -22,6 +30,7 @@ template("cmake") {
       "$target_cpu",
       "$is_debug",
       "$static_link_crt",
+      "$toolset",
     ]
     inputs = [ cmake_root_dir ]
     outputs = cmake_outputs

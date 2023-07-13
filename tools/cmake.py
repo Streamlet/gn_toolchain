@@ -13,6 +13,7 @@ def cmake_build(
     target_cpu,
     is_debug,
     static_link_crt,
+    toolset,
 ):
     config = 'debug' if is_debug else 'release'
     options = ''
@@ -22,7 +23,8 @@ def cmake_build(
             'Debug' if is_debug else '',
             '' if static_link_crt else 'DLL',
         )
-        options += '-DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY=%s ' % (crt_link_flags,)
+        options += '-DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY=%s ' % (
+            crt_link_flags,)
     elif sys.platform == 'darwin':
         options += '-DCMAKE_OSX_ARCHITECTURES=%s ' % 'i386' if target_cpu == 'x86' else 'x86_64'
     else:
@@ -33,6 +35,8 @@ def cmake_build(
     if len(cmake_options) > 0:
         options += ' '.join(map(lambda item: '-D' + item,
                             cmake_options.split(',')))
+    if len(toolset) > 0:
+        options += ' -T %s' % toolset
     config_cmd = 'cmake %s -S %s -B %s' % (
         options,
         cmake_root,
@@ -52,15 +56,14 @@ def cmake_build(
 
 def main():
     [
-        cmake_root,  # rebase_path(cmake_root, root_build_dir)
-        cmake_options,  # string_join(",", cmake_options)
-        # rebase_path(target_out_dir, root_build_dir) + "/$target_name"
+        cmake_root,
+        cmake_options,
         build_dir,
-        # rebase_path(root_out_dir, root_build_dir) + "/$target_name"
         install_dir,
-        target_cpu,  # "$target_cpu"
-        is_debug,  # "$is_debug"
-        static_link_crt,  # "$static_link_crt"
+        target_cpu,
+        is_debug,
+        static_link_crt,
+        toolset,
     ] = sys.argv[1:]
 
     cmake_build(
@@ -71,6 +74,7 @@ def main():
         target_cpu,
         is_debug == 'true',
         static_link_crt == 'true',
+        toolset,
     )
 
 

@@ -3,7 +3,6 @@
 
 import os
 import sys
-import psutil
 
 
 def makefile_build(
@@ -17,7 +16,6 @@ def makefile_build(
     makefile_env,
 ):
     prefix = os.path.abspath(makefile_prefix)
-    env = os.path.abspath(makefile_env)
     config_options = ''
     if len(makefile_config_options) > 0:
         config_options = ' '.join(
@@ -31,6 +29,13 @@ def makefile_build(
     else:
         targets = ['']
 
+    with open(makefile_env, 'r') as f:
+        env = f.read()
+        for e in env.split('\0'):
+            kv = e.strip().split('=', 2)
+            if len(kv) >= 2:
+                os.environ[kv[0]] = kv[1]
+
     os.chdir(makefile_root_dir)
     if len(makefile_config_cmd) > 0:
         config_cmd = '%s --prefix=%s %s' % (
@@ -43,9 +48,7 @@ def makefile_build(
         os.system(config_cmd)
         os.system('echo > "%s"' % os.path.join(prefix, 'configure'))
 
-    ninja_path = psutil.Process(os.getppid()).exe()
-    make = 'make' if sys.platform != 'win32' else (
-        '%s -t msvc -e %s -- nmake' % (ninja_path, env))
+    make = 'make' if sys.platform != 'win32' else 'nmake'
     if sys.platform == 'win32' and len(makefile_file) > 0:
         make += " /f %s" % makefile_file
     for target in targets:
@@ -59,15 +62,14 @@ def makefile_build(
 
 def main():
     [
-        makefile_root_dir,  # rebase_path(makefile_root_dir, root_build_dir)
-        makefile_config_cmd,  # "$makefile_config_cmd "
-        makefile_prefix,  # rebase_path(makefile_prefix, root_build_dir)
-        # string_join(",", makefile_config_options) + " "
+        makefile_root_dir,
+        makefile_config_cmd,
+        makefile_prefix,
         makefile_config_options,
-        makefile_file,  # makefile_file + " "
-        makefile_options,  # string_join(",", makefile_options) + " "
-        makefile_targets,  # string_join(",", makefile_target) + " "
-        makefile_env,  # makefile_env + " "
+        makefile_file,
+        makefile_options,
+        makefile_targets,
+        makefile_env,
     ] = sys.argv[1:]
 
     makefile_build(

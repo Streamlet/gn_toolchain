@@ -16,10 +16,20 @@ def build_boost(
     static_link_crt,
     boost_layout,
     boost_shared_library,
+    boost_defines,
+    boost_env,
 ):
     build_dir = os.path.abspath(build_dir)
     install_dir = os.path.abspath(install_dir)
     include_dir = '' if install_headers else '--includedir=.'
+
+    with open(boost_env, 'r') as f:
+        env = f.read()
+        for e in env.split('\0'):
+            kv = e.strip().split('=', 2)
+            if len(kv) >= 2:
+                os.environ[kv[0]] = kv[1]
+
     os.chdir(boost_source_dir)
 
     b2 = 'b2.exe' if sys.platform == 'win32' else './b2'
@@ -39,12 +49,17 @@ def build_boost(
     link = 'shared' if boost_shared_library else 'static'
     if len(boost_layout) > 0:
         layout = '--layout=%s' % boost_layout
+    defines = ''
+    if len(boost_defines) > 0:
+        defines = ' '.join(map(lambda item: 'define=%s' %
+                               item, boost_defines.split(',')))
+
     action = 'install' if len(boost_libraries) > 0 else 'header'
     cflags = ''
     if sys.platform == 'linux':
         cflags = 'cflags=-fPIC cxxflags=-fPIC'
-    cmd = '%s --build-dir=%s --prefix=%s %s address-model=%d %s %s variant=%s link=%s threading=multi runtime-link=%s %s %s' % (
-        b2, build_dir, install_dir, include_dir, address_model, layout, libraries, variant, link, runtime_link, cflags, action)
+    cmd = '%s --build-dir=%s --prefix=%s %s address-model=%d %s %s variant=%s link=%s threading=multi runtime-link=%s %s %s %s' % (
+        b2, build_dir, install_dir, include_dir, address_model, layout, libraries, variant, link, runtime_link, cflags, defines, action)
 
     print(cmd)
     os.system(cmd)
@@ -52,18 +67,18 @@ def build_boost(
 
 def main():
     [
-        boost_source_dir,  # rebase_path(boost_source_dir, root_build_dir)
-        boost_libraries,  # string_join(",", boost_libraries)
-        # rebase_path(target_out_dir, root_build_dir) + "/$target_name"
+        boost_source_dir,
+        boost_libraries,
         build_dir,
-        # rebase_path(root_out_dir, root_build_dir) + "/$target_name"
         install_dir,
-        install_headers,  # "$boost_install_headers"
-        target_cpu,  # target_cpu
-        is_debug,  # "$is_debug"
-        static_link_crt,  # "$static_link_crt"
-        boost_layout,  # boost_layout
-        boost_shared_library,  # "$boost_shared_library"
+        install_headers,
+        target_cpu,
+        is_debug,
+        static_link_crt,
+        boost_layout,
+        boost_shared_library,
+        boost_defines,
+        boost_env,
     ] = sys.argv[1:]
 
     build_boost(
@@ -77,6 +92,8 @@ def main():
         static_link_crt == 'true',
         boost_layout,
         boost_shared_library == 'true',
+        boost_defines.strip(),
+        boost_env,
     )
 
 

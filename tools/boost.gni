@@ -1,6 +1,6 @@
 template("boost") {
   # required: boost_source_dir, boost_outputs
-  # optional: boost_libraries, boost_build_dir, boost_install_dir, boost_install_headers, boost_layout, boost_shared_library
+  # optional: boost_libraries, boost_build_dir, boost_install_dir, boost_install_headers, boost_layout, boost_shared_library boost_defines
   action("$target_name") {
     boost_libraries = []
     boost_build_dir = target_out_dir + "/" + target_name
@@ -8,6 +8,8 @@ template("boost") {
     boost_install_headers = false
     boost_layout = ""
     boost_shared_library = false
+    boost_defines = []
+    boost_env = "environment." + host_cpu + "." + target_cpu
     forward_variables_from(invoker,
                            "*",
                            [
@@ -16,6 +18,12 @@ template("boost") {
                              "input",
                              "output_name",
                            ])
+    if (is_winxp) {
+      boost_defines += [
+        "BOOST_USE_WINAPI_VERSION=BOOST_WINAPI_VERSION_WINXP",
+        "_WIN32_WINNT=BOOST_WINAPI_VERSION_WINXP",
+      ]
+    }
     script = "//build/tools/boost.py"
     args = [
       rebase_path(boost_source_dir, root_build_dir),
@@ -28,6 +36,8 @@ template("boost") {
       "$static_link_crt",
       boost_layout,
       "$boost_shared_library",
+      string_join(",", boost_defines) + " ",
+      boost_env,
     ]
     inputs = [ boost_source_dir ]
     outputs = boost_outputs

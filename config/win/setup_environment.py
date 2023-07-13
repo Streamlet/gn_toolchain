@@ -57,7 +57,7 @@ def DetectSetEnvBatchFileByVSWhere(host_cpu, target_cpu):
         arch = target_cpu
     else:
         arch = host_cpu + '_' + target_cpu
-    return vs_version, '"' + batch_file + '" ' + arch
+    return vs_version, [batch_file, arch]
 
 
 def DetectSetEnvBatchFileByEnvVar(host_cpu, target_cpu):
@@ -76,7 +76,7 @@ def DetectSetEnvBatchFileByEnvVar(host_cpu, target_cpu):
         else:
             batch_file = os.path.join(path, 'vsvars32.bat')
             if os.path.exists(batch_file):
-                return version, '"' + batch_file + '"'
+                return version, [batch_file]
     return None, None
 
 
@@ -86,18 +86,36 @@ def DetectSetEnvBatchFileByFindVC6(host_cpu, target_cpu):
         program_files_x86, 'Microsoft Visual Studio', 'VC98', 'Bin', 'vcvars32.bat')
     if not os.path.exists(batch_file):
         return None, None
-    return VC_60_VERSION, '"' + batch_file + '"'
+    return VC_60_VERSION, [batch_file]
 
 
-def SetupEnvironment(host_cpu, target_cpu):
+def FindWinSDK71(host_cpu, target_cpu):
+    program_files_x86 = os.environ['ProgramFiles(x86)']
+    sdk_dir = os.path.join(
+        program_files_x86, 'Microsoft SDKs', 'Windows', 'v7.1A')
+    include_path = os.path.join(sdk_dir, 'Include')
+    lib_path = os.path.join(sdk_dir, 'Lib')
+    if target_cpu == 'x64':
+        lib_path = os.path.join(lib_path, 'x64')
+    if not os.path.exists(include_path) or not os.path.exists(lib_path):
+        return None, None
+    return include_path, lib_path
+
+
+def SetupEnvironment(host_cpu, target_cpu, is_winxp):
     version, cmd = DetectSetEnvBatchFileByVSWhere(host_cpu, target_cpu)
     if cmd is None:
         version, cmd = DetectSetEnvBatchFileByEnvVar(host_cpu, target_cpu)
     if cmd is None:
         version, cmd = DetectSetEnvBatchFileByFindVC6(host_cpu, target_cpu)
     if cmd is None:
-        assert False, 'Cannot fine Windows SDK SetEnvBatchFile'
-    env_lines = ExecuteCmd(cmd + ' && Set')
+        assert False, 'Cannot fine Windows SDK set-env batch file'
+    if is_winxp:
+        include_path, lib_path = FindWinSDK71(host_cpu, target_cpu)
+        if include_path is None or lib_path is None:
+            assert False, 'Cannot Windows SDK v7.1A, please make sure it is installed.'
+    shell_cmd = '"%s" %s && Set' % (cmd[0], ' '.join(cmd[1:]))
+    env_lines = ExecuteCmd(shell_cmd)
     ENV_VAR_TO_SAVE = (
         'INCLUDE',
         'LIB',
@@ -109,15 +127,37 @@ def SetupEnvironment(host_cpu, target_cpu):
         'TMP',
     )
     env = {}
-    env_block = ''
     for line in env_lines.split('\n'):
         kv = line.split('=', 2)
         if kv[0].upper() in ENV_VAR_TO_SAVE:
             env[kv[0].upper()] = kv[1].strip()
-            env_block += line.strip() + '\0'
-    env_block += '\0'
+    if is_winxp:
+        if version > VS_2017_VERSION:
+            vc141_version_file = os.path.join(os.path.dirname(
+                cmd[0]), 'Microsoft.VCToolsVersion.v141.default.txt')
+            vc_version_file = os.path.join(os.path.dirname(
+                cmd[0]), 'Microsoft.VCToolsVersion.default.txt')
+            if not os.path.exists(vc141_version_file):
+                assert False, 'v141_xp toolset not installed'
+            with open(vc141_version_file, 'r') as f:
+                vc141_version = f.read().strip()
+            with open(vc_version_file, 'r') as f:
+                vc_version = f.read().strip()
+            env['INCLUDE'] = env['INCLUDE'].replace(vc_version, vc141_version)
+            env['LIB'] = env['LIB'].replace(vc_version, vc141_version)
+            env['LIBPATH'] = env['LIBPATH'].replace(vc_version, vc141_version)
+            env['PATH'] = env['PATH'].replace(vc_version, vc141_version)
+
+        env['INCLUDE'] = include_path + ';' + env['INCLUDE']
+        env['LIB'] = lib_path + ';' + env['LIB']
+        env['LIBPATH'] = lib_path + ';' + env['LIBPATH']
+
+    env_file_content = ''
+    for k in env:
+        env_file_content += k + '=' + env[k] + '\0'
+    env_file_content += '\0'
     with open('environment.%s.%s' % (host_cpu, target_cpu), 'w') as f:
-        f.write(env_block)
+        f.write(env_file_content)
     return version, env
 
 
@@ -136,7 +176,8 @@ def FindCompiles(env_path):
 
 
 def main():
-    version, env = SetupEnvironment(sys.argv[1], sys.argv[2])
+    (host_cpu, target_cpu, is_winxp) = sys.argv[1:]
+    version, env = SetupEnvironment(host_cpu, target_cpu, is_winxp == 'true')
     print('VERSION = %s' % version)
     cc_path = FindCompiles(env['PATH'])
     for cc in cc_path:

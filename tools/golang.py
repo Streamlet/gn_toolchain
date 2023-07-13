@@ -34,11 +34,11 @@ def golang_build(go_root_dir, go_out_dir, go_gcflags, go_ldflags, is_debug):
 
 def main():
     [
-        go_root_dir,  # rebase_path(go_root_dir, root_build_dir),
-        go_out_dir,  # rebase_path(go_out_dir, root_build_dir),
-        go_gcflags,  # string_join(",", go_gcflags) + " ",
-        go_ldflags,  # string_join(",", go_ldflags) + " ",
-        is_debug,  # "$is_debug"
+        go_root_dir,
+        go_out_dir,
+        go_gcflags,
+        go_ldflags,
+        is_debug,
     ] = sys.argv[1:]
 
     golang_build(

@@ -55,11 +55,16 @@ declare_args() {
   cc_std = "c++17"
 }
 
-declare_args() {
-  # for win only
-  use_ucrt = false  # whether to use the Universal CRT or not
-  static_link_crt = true  # static or dynamic link crt
-  winver = "0x0A00"  # use to define WINVER, _WIN32_WINNT, _WIN32_WINDOWS and NTDDI_VERSION
+if (is_win) {
+  declare_args() {
+    is_winxp = false  # targeting to Windows XP
+    static_link_crt = true  # static or dynamic link crt
+    winver = "0x0A00"  # to define WINVER, _WIN32_WINNT and NTDDI_VERSION
+  }
+
+  if (is_winxp) {
+    winver = "0x0501"
+  }
 }
 
 # ==============================================================================
