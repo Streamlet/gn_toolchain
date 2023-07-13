@@ -74,7 +74,7 @@ def main():
         target_cpu,
         is_debug == 'true',
         static_link_crt == 'true',
-        toolset,
+        toolset.strip(),
     )
 
 
