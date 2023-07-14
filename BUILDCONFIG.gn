@@ -55,16 +55,15 @@ declare_args() {
   cc_std = "c++17"
 }
 
-if (is_win) {
-  declare_args() {
-    is_winxp = false  # targeting to Windows XP
-    static_link_crt = true  # static or dynamic link crt
-    winver = "0x0A00"  # to define WINVER, _WIN32_WINNT and NTDDI_VERSION
-  }
+declare_args() {
+  is_winxp = false  # targeting to Windows XP
+  static_link_crt = is_win  # static or dynamic link crt
+  winver = "0x0A00"  # to define WINVER, _WIN32_WINNT and NTDDI_VERSION
+}
 
-  if (is_winxp) {
-    winver = "0x0501"
-  }
+if (is_winxp) {
+  winver = "0x0501"
+  assert(target_cpu == "x86", "Targeting to Windows XP does only support x86")
 }
 
 # ==============================================================================

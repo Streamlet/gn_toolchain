@@ -18,6 +18,7 @@ def build_boost(
     boost_shared_library,
     boost_defines,
     boost_env,
+    toolset
 ):
     build_dir = os.path.abspath(build_dir)
     install_dir = os.path.abspath(install_dir)
@@ -31,7 +32,6 @@ def build_boost(
                 os.environ[kv[0]] = kv[1]
 
     os.chdir(boost_source_dir)
-
     b2 = 'b2.exe' if sys.platform == 'win32' else './b2'
     if not os.path.exists(b2):
         if sys.platform == 'win32':
@@ -49,6 +49,10 @@ def build_boost(
     link = 'shared' if boost_shared_library else 'static'
     if len(boost_layout) > 0:
         layout = '--layout=%s' % boost_layout
+
+    if len(toolset) > 0:
+        toolset = 'toolset=msvc-' + str(float(toolset) / 10)
+
     defines = ''
     if len(boost_defines) > 0:
         defines = ' '.join(map(lambda item: 'define=%s' %
@@ -58,8 +62,8 @@ def build_boost(
     cflags = ''
     if sys.platform == 'linux':
         cflags = 'cflags=-fPIC cxxflags=-fPIC'
-    cmd = '%s --build-dir=%s --prefix=%s %s address-model=%d %s %s variant=%s link=%s threading=multi runtime-link=%s %s %s %s' % (
-        b2, build_dir, install_dir, include_dir, address_model, layout, libraries, variant, link, runtime_link, cflags, defines, action)
+    cmd = '%s --build-dir=%s --prefix=%s %s address-model=%d %s %s variant=%s link=%s threading=multi runtime-link=%s %s %s %s %s' % (
+        b2, build_dir, install_dir, include_dir, address_model, layout, libraries, variant, link, runtime_link, toolset, cflags, defines, action)
 
     print(cmd)
     os.system(cmd)
@@ -79,6 +83,7 @@ def main():
         boost_shared_library,
         boost_defines,
         boost_env,
+        toolset,
     ] = sys.argv[1:]
 
     build_boost(
@@ -94,6 +99,7 @@ def main():
         boost_shared_library == 'true',
         boost_defines.strip(),
         boost_env,
+        toolset.strip(),
     )
 
 

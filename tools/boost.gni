@@ -24,6 +24,14 @@ template("boost") {
         "_WIN32_WINNT=BOOST_WINAPI_VERSION_WINXP",
       ]
     }
+    toolset = ""
+    if (is_winxp) {
+      if (vs_version > 141) {
+        toolset = 141
+      } else if (vs_version >= 110) {
+        toolset = vs_version
+      }
+    }
     script = "//build/tools/boost.py"
     args = [
       rebase_path(boost_source_dir, root_build_dir),
@@ -38,6 +46,7 @@ template("boost") {
       "$boost_shared_library",
       string_join(",", boost_defines) + " ",
       boost_env,
+      "$toolset ",
     ]
     inputs = [ boost_source_dir ]
     outputs = boost_outputs
