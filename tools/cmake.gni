@@ -31,6 +31,7 @@ template("cmake") {
       "$is_debug",
       "$static_link_crt",
       "$toolset ",
+      "$winver ",
     ]
     inputs = [ cmake_root_dir ]
     outputs = cmake_outputs

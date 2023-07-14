@@ -14,6 +14,7 @@ def cmake_build(
     is_debug,
     static_link_crt,
     toolset,
+    winver,
 ):
     config = 'debug' if is_debug else 'release'
     options = ''
@@ -35,6 +36,9 @@ def cmake_build(
     if len(cmake_options) > 0:
         options += ' '.join(map(lambda item: '-D' + item,
                             cmake_options.split(',')))
+    if len(winver) > 0:
+        options += ' -DCMAKE_C_FLAGS_INIT=_WIN32_WINNT=%s -DCMAKE_CXX_FLAGS_INIT=_WIN32_WINNT=%s' % (
+            winver, winver)
     if len(toolset) > 0:
         options += ' -T %s' % toolset
     config_cmd = 'cmake %s -S %s -B %s' % (
@@ -64,6 +68,7 @@ def main():
         is_debug,
         static_link_crt,
         toolset,
+        winver,
     ] = sys.argv[1:]
 
     cmake_build(
@@ -75,6 +80,7 @@ def main():
         is_debug == 'true',
         static_link_crt == 'true',
         toolset.strip(),
+        winver.strip(),
     )
 
 
