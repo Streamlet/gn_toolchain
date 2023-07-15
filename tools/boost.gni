@@ -48,8 +48,8 @@ template("boost") {
       boost_layout,
       "$boost_shared_library",
       string_join(",", boost_defines) + " ",
-      boost_env,
-      "$toolset ",
+      boost_env + " ",
+      toolset + " ",
     ]
     inputs = [ boost_source_dir ]
     outputs = boost_outputs

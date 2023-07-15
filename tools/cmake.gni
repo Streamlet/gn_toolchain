@@ -30,8 +30,8 @@ template("cmake") {
       "$target_cpu",
       "$is_debug",
       "$static_link_crt",
-      "$toolset ",
-      "$winver ",
+      toolset + " ",
+      winver + " ",
     ]
     inputs = [ cmake_root_dir ]
     outputs = cmake_outputs

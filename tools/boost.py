@@ -99,7 +99,7 @@ def main():
         boost_layout,
         boost_shared_library == 'true',
         boost_defines.strip(),
-        boost_env,
+        boost_env.strip(),
         toolset.strip(),
     )
 
