@@ -9,7 +9,6 @@ template("boost") {
     boost_layout = ""
     boost_shared_library = false
     boost_defines = []
-    boost_env = "environment." + host_cpu + "." + target_cpu
     forward_variables_from(invoker,
                            "*",
                            [
@@ -18,6 +17,10 @@ template("boost") {
                              "input",
                              "output_name",
                            ])
+    boost_env = ""
+    if (is_win) {
+      boost_env = "environment." + host_cpu + "." + target_cpu
+    }
     if (is_winxp) {
       boost_defines += [
         "BOOST_USE_WINAPI_VERSION=BOOST_WINAPI_VERSION_WINXP",

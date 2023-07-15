@@ -24,12 +24,13 @@ def build_boost(
     install_dir = os.path.abspath(install_dir)
     include_dir = '' if install_headers else '--includedir=.'
 
-    with open(boost_env, 'r') as f:
-        env = f.read()
-        for e in env.split('\0'):
-            kv = e.strip().split('=', 2)
-            if len(kv) >= 2:
-                os.environ[kv[0]] = kv[1]
+    if len(boost_env) > 0:
+        with open(boost_env, 'r') as f:
+            env = f.read()
+            for e in env.split('\0'):
+                kv = e.strip().split('=', 2)
+                if len(kv) >= 2:
+                    os.environ[kv[0]] = kv[1]
 
     os.chdir(boost_source_dir)
     b2 = 'b2.exe' if sys.platform == 'win32' else './b2'

@@ -37,7 +37,7 @@ def cmake_build(
         options += ' '.join(map(lambda item: '-D' + item,
                             cmake_options.split(',')))
     if len(winver) > 0:
-        options += ' -DCMAKE_C_FLAGS_INIT=_WIN32_WINNT=%s -DCMAKE_CXX_FLAGS_INIT=_WIN32_WINNT=%s' % (
+        options += ' -DCMAKE_C_FLAGS_INIT="/D _WIN32_WINNT=%s" -DCMAKE_CXX_FLAGS_INIT="/D _WIN32_WINNT=%s"' % (
             winver, winver)
     if len(toolset) > 0:
         options += ' -T %s' % toolset

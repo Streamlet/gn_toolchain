@@ -29,12 +29,13 @@ def makefile_build(
     else:
         targets = ['']
 
-    with open(makefile_env, 'r') as f:
-        env = f.read()
-        for e in env.split('\0'):
-            kv = e.strip().split('=', 2)
-            if len(kv) >= 2:
-                os.environ[kv[0]] = kv[1]
+    if len(makefile_env) > 0:
+        with open(makefile_env, 'r') as f:
+            env = f.read()
+            for e in env.split('\0'):
+                kv = e.strip().split('=', 2)
+                if len(kv) >= 2:
+                    os.environ[kv[0]] = kv[1]
 
     os.chdir(makefile_root_dir)
     if len(makefile_config_cmd) > 0:
