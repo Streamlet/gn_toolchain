@@ -65,7 +65,7 @@ toolchain("msvc") {
     description = "RC {{output}}"
   }
   tool("asm") {
-    command = "$env_wrappper $ml /nologo /Fo{{output}} {{defines}} {{include_dirs}} {{asmflags}} {{source}}"
+    command = "$env_wrappper $ml /nologo /c /Fo{{output}} {{defines}} {{include_dirs}} {{asmflags}} {{source}}"
     description = "ASM {{output}}"
     outputs = [ "$object_subdir/{{source_name_part}}.obj" ]
   }
