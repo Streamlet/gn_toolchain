@@ -11,14 +11,24 @@ config("default") {
   } else {
     defines = [ "NDEBUG" ]
   }
+}
 
+config("c_std") {
   if (is_win) {
     if (vs_version >= 150) {
       cflags_c = [ "/std:$c_std" ]
-      cflags_cc = [ "/std:$cc_std" ]
     }
   } else {
     cflags_c = [ "-std=$c_std" ]
+  }
+}
+
+config("cc_std") {
+  if (is_win) {
+    if (vs_version >= 150) {
+      cflags_cc = [ "/std:$cc_std" ]
+    }
+  } else {
     cflags_cc = [ "-std=$cc_std" ]
   }
 }
