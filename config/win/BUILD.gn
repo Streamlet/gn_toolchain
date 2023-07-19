@@ -90,9 +90,7 @@ config("optmize") {
       "/OPT:ICF",
       "/OPT:REF",
     ]
-    if (vs_version >= 140) {
-      ldflags += [ "/LTCG:incremental" ]
-    } else if (vs_version >= 70) {
+    if (vs_version >= 70) {
       ldflags += [ "/LTCG" ]
     }
     if (vs_version >= 70 && target_cpu == "x86") {
