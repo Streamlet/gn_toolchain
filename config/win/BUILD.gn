@@ -41,6 +41,9 @@ config("default") {
       "/fp:precise",
     ]
   }
+  if (vs_version >= 140) {
+    cflags += [ "/utf-8" ]
+  }
 
   cflags_c = []
   cflags_cc = [ "/EHsc" ]
