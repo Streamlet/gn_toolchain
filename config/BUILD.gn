@@ -20,6 +20,9 @@ config("c_std") {
     }
   } else {
     cflags_c = [ "-std=$c_std" ]
+    if (is_mac) {
+      cflags_objc = [ "-std=$c_std" ]
+    }
   }
 }
 
@@ -30,5 +33,8 @@ config("cc_std") {
     }
   } else {
     cflags_cc = [ "-std=$cc_std" ]
+    if (is_mac) {
+      cflags_objcc = [ "-std=$cc_std" ]
+    }
   }
 }
