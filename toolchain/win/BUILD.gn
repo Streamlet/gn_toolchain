@@ -20,6 +20,8 @@ toolchain("msvc") {
   # Object files go in this directory.
   object_subdir = "{{target_out_dir}}/{{label_name}}"
 
+  copy_script = rebase_path("../../tools/copy.py", root_build_dir)
+
   tool("cc") {
     precompiled_header_type = "msvc"
     pdbname = "{{target_out_dir}}/{{label_name}}_c.pdb"
@@ -168,7 +170,7 @@ toolchain("msvc") {
     description = "STAMP {{output}}"
   }
   tool("copy") {
-    command = "copy /Y {{source}} {{output}}"
+    command = "python $copy_script {{source}} {{output}}"
     description = "COPY {{source}} {{output}}"
   }
 }
