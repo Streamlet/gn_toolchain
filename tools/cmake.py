@@ -18,6 +18,8 @@ def cmake_build(
 ):
     config = 'debug' if is_debug else 'release'
     options = ''
+    cflags = ''
+    cxxflags = ''
     if sys.platform == 'win32':
         options += '-A %s ' % ('Win32' if target_cpu == 'x86' else 'x64')
         crt_link_flags = 'MultiThreaded%s%s' % (
@@ -29,16 +31,19 @@ def cmake_build(
     elif sys.platform == 'darwin':
         options += '-DCMAKE_OSX_ARCHITECTURES=%s ' % 'i386' if target_cpu == 'x86' else 'x86_64'
     else:
-        address_model = '-m32' if target_cpu == 'x86' else '-m64'
-        options += '-DCMAKE_C_FLAGS_INIT=%s -DCMAKE_CXX_FLAGS_INIT=%s ' % (
-            address_model, address_model)
+        cflags = '-m32 ' if target_cpu == 'x86' else '-m64 '
+        cxxflags = '-m32 ' if target_cpu == 'x86' else '-m64 '
     options += '-DCMAKE_INSTALL_PREFIX=%s ' % install_dir
     if len(cmake_options) > 0:
         options += ' '.join(map(lambda item: '-D' + item,
                             cmake_options.split(',')))
     if len(winver) > 0:
-        options += ' -DCMAKE_C_FLAGS_INIT="/D _WIN32_WINNT=%s" -DCMAKE_CXX_FLAGS_INIT="/D _WIN32_WINNT=%s"' % (
-            winver, winver)
+        cflags += '/D_WIN32_WINNT=%s ' % winver
+        cxxflags += '/D_WIN32_WINNT=%s ' % winver
+    if len(cflags) > 0:
+        options += ' -DCMAKE_C_FLAGS_INIT="%s"' % cflags
+    if len(cxxflags) > 0:
+        options += ' -DCMAKE_CXX_FLAGS_INIT="%s"' % cxxflags
     if len(toolset) > 0:
         options += ' -T %s' % toolset
     config_cmd = 'cmake %s -S %s -B %s' % (
