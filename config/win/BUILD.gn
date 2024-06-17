@@ -128,6 +128,12 @@ config("crt_link") {
   }
 
   libs = [ "oldnames.lib" ]
+  if (vs_version >= 140) {
+    libs += [
+      "legacy_stdio_definitions.lib",
+      "legacy_stdio_wide_specifiers.lib",
+    ]
+  }
   if (static_link_crt) {
     if (is_debug) {
       libs += [
