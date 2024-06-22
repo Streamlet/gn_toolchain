@@ -15,7 +15,7 @@ config("default") {
 
 config("c_std") {
   if (is_win) {
-    if (vs_version >= 150) {
+    if (vs_version >= 150 && !is_winxp) {
       cflags_c = [ "/std:$c_std" ]
     }
   } else {

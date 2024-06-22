@@ -65,7 +65,6 @@ if (is_win) {
   winver = "0x0A00"
   if (is_winxp) {
     winver = "0x0501"
-    assert(target_cpu == "x86", "Targeting to Windows XP does only support x86")
   }
 }
 
