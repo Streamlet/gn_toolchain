@@ -25,6 +25,8 @@ config("default") {
       "/GS",
       "/Zc:forScope",
       "/Zc:wchar_t",
+      "/Zc:__cplusplus",
+      "/Zc:__STDC__",
     ]
   }
   if (vs_version >= 80) {
