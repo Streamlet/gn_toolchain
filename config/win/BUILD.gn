@@ -25,8 +25,6 @@ config("default") {
       "/GS",
       "/Zc:forScope",
       "/Zc:wchar_t",
-      "/Zc:__cplusplus",
-      "/Zc:__STDC__",
     ]
   }
   if (vs_version >= 80) {
@@ -45,6 +43,13 @@ config("default") {
   }
   if (vs_version >= 140) {
     cflags += [ "/utf-8" ]
+  }
+  if (vs_version >= 141) {
+    cflags += [ "/Zc:__cplusplus" ]
+  }
+
+  if (vs_version >= 143) {
+    cflags += [ "/Zc:__STDC__" ]
   }
 
   cflags_c = []
