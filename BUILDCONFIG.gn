@@ -51,8 +51,13 @@ declare_args() {
 }
 
 declare_args() {
-  c_std = "c17"
-  cc_std = "c++17"
+  if (is_posix) {
+    c_std = "gnu17"
+    cc_std = "gnu++17"
+  } else {
+    c_std = "c17"
+    cc_std = "c++17"
+  }
 }
 
 declare_args() {
