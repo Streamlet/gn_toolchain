@@ -48,7 +48,7 @@ config("default") {
     cflags += [ "/Zc:__cplusplus" ]
   }
 
-  if (vs_version >= 143) {
+  if (vs_version >= 172) {
     cflags += [ "/Zc:__STDC__" ]
   }
 
