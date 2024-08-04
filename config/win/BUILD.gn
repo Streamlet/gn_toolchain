@@ -48,10 +48,6 @@ config("default") {
     cflags += [ "/Zc:__cplusplus" ]
   }
 
-  if (vs_version >= 172) {
-    cflags += [ "/Zc:__STDC__" ]
-  }
-
   cflags_c = []
   cflags_cc = [ "/EHsc" ]
   if (vs_version <= 60) {
