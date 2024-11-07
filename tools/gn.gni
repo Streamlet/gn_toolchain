@@ -1,0 +1,49 @@
+template("gn") {
+  # required: gn_root_dir
+  # optional: gn_targets, gn_args, export_include_dirs, export_libs
+
+  config("${target_name}_public_config") {
+    lib_dirs = [ target_out_dir + "/" + target_name ]
+    if (defined(invoker.export_include_dirs)) {
+      include_dirs = invoker.export_include_dirs
+    }
+    if (defined(invoker.export_libs)) {
+      libs = invoker.export_libs
+    }
+  }
+
+  action("$target_name") {
+    forward_variables_from(invoker,
+                           "*",
+                           [
+                             "script",
+                             "args",
+                             "input",
+                             "public_configs",
+                           ])
+    if (!defined(gn_targets)) {
+      gn_targets = []
+    }
+    if (!defined(gn_args)) {
+      gn_args = []
+    }
+    gn_args += [
+      "host_cpu=\"" + host_cpu + "\"",
+      "host_os=\"" + host_os + "\"",
+      "current_cpu=\"" + current_cpu + "\"",
+      "current_os=\"" + current_os + "\"",
+      "target_cpu=\"" + target_cpu + "\"",
+      "target_os=\"" + target_os + "\"",
+    ]
+    script = "//build/tools/gn.py"
+    args = [
+      rebase_path(gn_root_dir, root_build_dir),
+      rebase_path(target_name, root_build_dir, target_out_dir),
+      string_join(" ", gn_targets) + " ",
+      string_join(" ", gn_args) + " ",
+    ]
+    inputs = [ gn_root_dir ]
+    outputs = [target_out_dir] #rebase_path(gn_targets, target_out_dir, root_build_dir)
+    public_configs = [ ":${target_name}_public_config" ]
+  }
+}
