@@ -156,9 +156,3 @@ import("tools/makefile.gni")
 
 # help to build cmake projects
 import("tools/cmake.gni")
-
-# help to build boost
-import("tools/boost.gni")
-
-# help to build golang projects
-import("tools/golang.gni")
