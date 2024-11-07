@@ -148,6 +148,9 @@ if (is_win) {
   import("config/win/application.gni")
 }
 
+# help to build nested gn projects
+import("tools/gn.gni")
+
 # help to build makefile projects
 import("tools/makefile.gni")
 

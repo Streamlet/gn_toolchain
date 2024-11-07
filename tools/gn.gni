@@ -1,0 +1,70 @@
+template("gn") {
+  # required: gn_root_dir
+  # optional: gn_targets, gn_args, export_include_dirs, export_defines, export_libs, depended_libs, output_files
+
+  config("${target_name}_public_config") {
+    lib_dirs = [ target_out_dir + "/" + target_name ]
+    if (defined(invoker.export_include_dirs)) {
+      include_dirs = invoker.export_include_dirs
+    }
+    if (defined(invoker.export_defines)) {
+      defines = invoker.export_defines
+    }
+    libs = []
+    if (defined(invoker.export_libs)) {
+      libs += invoker.export_libs
+    }
+    if (defined(invoker.depend_libs)) {
+      libs += invoker.depend_libs
+    }
+  }
+
+  action("$target_name") {
+    forward_variables_from(invoker,
+                           "*",
+                           [
+                             "script",
+                             "args",
+                             "input",
+                             "public_configs",
+                           ])
+    if (!defined(gn_targets)) {
+      gn_targets = []
+    }
+    if (!defined(gn_args)) {
+      gn_args = []
+    }
+    gn_args += [
+      "host_cpu=\"$host_cpu\"",
+      "host_os=\"$host_os\"",
+      "current_cpu=\"$current_cpu\"",
+      "current_os=\"$current_os\"",
+      "target_cpu=\"$target_cpu\"",
+      "target_os=\"$target_os\"",
+      "is_debug=$is_debug",
+      "is_winxp=$is_winxp",
+      "static_link_crt=$static_link_crt",
+      "winver=\"$winver\"",
+    ]
+    script = "//build/tools/gn.py"
+    args = [
+      rebase_path(gn_root_dir, root_build_dir),
+      rebase_path(target_name, root_build_dir, target_out_dir),
+      string_join(" ", gn_targets) + " ",
+      string_join(" ", gn_args) + " ",
+    ]
+    inputs = [ gn_root_dir ]
+    outputs = []
+    if (defined(export_libs)) {
+      foreach(lib, export_libs) {
+        outputs += [ "$target_out_dir/$lib" ]
+      }
+    }
+    if (defined(output_files)) {
+      foreach(file, output_files) {
+        outputs += [ "$target_out_dir/$file" ]
+      }
+    }
+    public_configs = [ ":${target_name}_public_config" ]
+  }
+}
