@@ -61,7 +61,7 @@ def DetectSetEnvBatchFileByVSWhere(host_cpu, target_cpu):
     return vs_version, [batch_file, arch]
 
 
-def DetectSetEnvBatchFileByEnvVar(host_cpu, target_cpu):
+def DetectSetEnvBatchFileByEnvVar(expected_vs_version, host_cpu, target_cpu):
     regex = re.compile(r'VS(\d+)COMNTOOLS')
     vs_versions = []
     for vs in os.environ:
@@ -69,6 +69,8 @@ def DetectSetEnvBatchFileByEnvVar(host_cpu, target_cpu):
         if m:
             vs_versions.append((int(m.group(1)), os.environ[vs]))
     vs_versions = sorted(vs_versions, key=lambda item: item[0], reverse=True)
+    if expected_vs_version > 0:
+        vs_versions = [ item for item in vs_versions if item[0] == expected_vs_version ]
     for version, path in vs_versions:
         if version > VS_2003_VERSION:
             batch_file = os.path.join(path, '..', '..', 'VC', 'vcvarsall.bat')
@@ -106,22 +108,24 @@ def FindWinSDK7(host_cpu, target_cpu):
     return [os.path.join(sdk_dir, 'bin', 'setenv.cmd'), '/' + target_cpu], include_path, lib_path
 
 
-def SetupEnvironment(host_cpu, target_cpu, is_winxp):
-    version, cmd = DetectSetEnvBatchFileByVSWhere(host_cpu, target_cpu)
+def SetupEnvironment(expected_vs_version, host_cpu, target_cpu, is_winxp):
+    if is_winxp:
+        cmd, include_path, lib_path = FindWinSDK7(host_cpu, target_cpu)
+    else:
+        version, cmd = DetectSetEnvBatchFileByVSWhere(host_cpu, target_cpu)
+        if cmd is None or (expected_vs_version > 0 and version != expected_vs_version):
+            version, cmd = DetectSetEnvBatchFileByEnvVar(expected_vs_version, host_cpu, target_cpu)
+        if cmd is None or (expected_vs_version > 0 and version != expected_vs_version):
+            version, cmd = DetectSetEnvBatchFileByFindVC6(host_cpu, target_cpu)
     if cmd is None:
-        version, cmd = DetectSetEnvBatchFileByEnvVar(host_cpu, target_cpu)
-    if cmd is None:
-        version, cmd = DetectSetEnvBatchFileByFindVC6(host_cpu, target_cpu)
-    if cmd is None:
-        assert False, 'Cannot fine Windows SDK set-env batch file'
+        assert False, 'Cannot find Windows SDK set-env batch file'
     shell_cmd = '"%s" %s && Set' % (cmd[0], ' '.join(cmd[1:]))
     env_lines = ExecuteCmd(shell_cmd)
     env_ok = 'INCLUDE' in env_lines
-    if not env_ok or is_winxp:
+    if not env_ok and not is_winxp:
         cmd, include_path, lib_path = FindWinSDK7(host_cpu, target_cpu)
         if include_path is None or lib_path is None:
-            assert False, 'Cannot find Windows SDK 7, please make sure it is installed.'
-    if not env_ok:
+            assert False, 'Cannot find Windows SDK.'
         shell_cmd = '"%s" %s && Set' % (cmd[0], ' '.join(cmd[1:]))
         env_lines = ExecuteCmd(shell_cmd)
     ENV_VAR_TO_SAVE = (
@@ -179,14 +183,13 @@ def FindExecutableInPath(env_path, exe_name):
 
 def FindCompiles(env_path):
     cl_path = FindExecutableInPath(env_path, 'cl.exe')
-    clang_path = FindExecutableInPath(env_path, 'clang.exe')
-    return {'MSVC': cl_path, 'CLANG': clang_path}
+    return {'MSVC': cl_path}
 
 
 def main():
-    (host_cpu, target_cpu, is_winxp) = sys.argv[1:]
-    version, env = SetupEnvironment(host_cpu, target_cpu, is_winxp == 'true')
-    print('VERSION = %s' % version)
+    (expected_vs_version, host_cpu, target_cpu, is_winxp) = sys.argv[1:]
+    version, env = SetupEnvironment(int(expected_vs_version), host_cpu, target_cpu, is_winxp == 'true')
+    print('VERSION = %s' % (version if version is not None else ''))
     cc_path = FindCompiles(env['PATH'])
     for cc in cc_path:
         print('%s = %s' % (cc, 'true' if cc_path[cc] is not None else 'false'))
