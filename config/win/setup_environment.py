@@ -109,25 +109,23 @@ def FindWinSDK7(host_cpu, target_cpu):
 
 
 def SetupEnvironment(expected_vs_version, host_cpu, target_cpu, is_winxp):
-    if is_winxp:
-        cmd, include_path, lib_path = FindWinSDK7(host_cpu, target_cpu)
-    else:
-        version, cmd = DetectSetEnvBatchFileByVSWhere(host_cpu, target_cpu)
-        if cmd is None or (expected_vs_version > 0 and version != expected_vs_version):
-            version, cmd = DetectSetEnvBatchFileByEnvVar(expected_vs_version, host_cpu, target_cpu)
-        if cmd is None or (expected_vs_version > 0 and version != expected_vs_version):
-            version, cmd = DetectSetEnvBatchFileByFindVC6(host_cpu, target_cpu)
-    if cmd is None:
+    version, cmd = DetectSetEnvBatchFileByVSWhere(host_cpu, target_cpu)
+    if cmd is None or (expected_vs_version > 0 and version != expected_vs_version):
+        version, cmd = DetectSetEnvBatchFileByEnvVar(expected_vs_version, host_cpu, target_cpu)
+    if cmd is None or (expected_vs_version > 0 and version != expected_vs_version):
+        version, cmd = DetectSetEnvBatchFileByFindVC6(host_cpu, target_cpu)
+    if cmd is None and not is_winxp:
         assert False, 'Cannot find Windows SDK set-env batch file'
     shell_cmd = '"%s" %s && Set' % (cmd[0], ' '.join(cmd[1:]))
     env_lines = ExecuteCmd(shell_cmd)
     env_ok = 'INCLUDE' in env_lines
-    if not env_ok and not is_winxp:
+    if not env_ok or (expected_vs_version > 0 and version != expected_vs_version) or is_winxp:
         cmd, include_path, lib_path = FindWinSDK7(host_cpu, target_cpu)
         if include_path is None or lib_path is None:
             assert False, 'Cannot find Windows SDK.'
-        shell_cmd = '"%s" %s && Set' % (cmd[0], ' '.join(cmd[1:]))
-        env_lines = ExecuteCmd(shell_cmd)
+        if not env_ok:
+            shell_cmd = '"%s" %s && Set' % (cmd[0], ' '.join(cmd[1:]))
+            env_lines = ExecuteCmd(shell_cmd)
     ENV_VAR_TO_SAVE = (
         'INCLUDE',
         'LIB',
