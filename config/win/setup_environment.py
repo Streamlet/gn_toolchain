@@ -3,6 +3,7 @@ import sys
 import locale
 import subprocess
 import re
+import winreg
 
 
 VC_60_VERSION = 60
@@ -72,7 +73,11 @@ def DetectSetEnvBatchFileByEnvVar(host_cpu, target_cpu):
         if version > VS_2003_VERSION:
             batch_file = os.path.join(path, '..', '..', 'VC', 'vcvarsall.bat')
             if os.path.exists(batch_file):
-                return version, '"' + batch_file + '" ' + target_cpu
+                if host_cpu == target_cpu:
+                    arch = target_cpu
+                else:
+                    arch = host_cpu + '_' + target_cpu
+                return version, [batch_file, arch]
         else:
             batch_file = os.path.join(path, 'vsvars32.bat')
             if os.path.exists(batch_file):
@@ -89,17 +94,16 @@ def DetectSetEnvBatchFileByFindVC6(host_cpu, target_cpu):
     return VC_60_VERSION, [batch_file]
 
 
-def FindWinSDK71(host_cpu, target_cpu):
-    program_files_x86 = os.environ['ProgramFiles(x86)']
-    sdk_dir = os.path.join(
-        program_files_x86, 'Microsoft SDKs', 'Windows', 'v7.1A')
+def FindWinSDK7(host_cpu, target_cpu):
+    with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\Microsoft SDKs\Windows', 0, winreg.KEY_READ | winreg.KEY_WOW64_32KEY) as key:
+        sdk_dir, type = winreg.QueryValueEx(key, "CurrentInstallFolder")
     include_path = os.path.join(sdk_dir, 'Include')
     lib_path = os.path.join(sdk_dir, 'Lib')
     if target_cpu == 'x64':
         lib_path = os.path.join(lib_path, 'x64')
     if not os.path.exists(include_path) or not os.path.exists(lib_path):
-        return None, None
-    return include_path, lib_path
+        return None, None, None
+    return [os.path.join(sdk_dir, 'bin', 'setenv.cmd'), '/' + target_cpu], include_path, lib_path
 
 
 def SetupEnvironment(host_cpu, target_cpu, is_winxp):
@@ -110,12 +114,16 @@ def SetupEnvironment(host_cpu, target_cpu, is_winxp):
         version, cmd = DetectSetEnvBatchFileByFindVC6(host_cpu, target_cpu)
     if cmd is None:
         assert False, 'Cannot fine Windows SDK set-env batch file'
-    if is_winxp:
-        include_path, lib_path = FindWinSDK71(host_cpu, target_cpu)
-        if include_path is None or lib_path is None:
-            assert False, 'Cannot Windows SDK v7.1A, please make sure it is installed.'
     shell_cmd = '"%s" %s && Set' % (cmd[0], ' '.join(cmd[1:]))
     env_lines = ExecuteCmd(shell_cmd)
+    env_ok = 'INCLUDE' in env_lines
+    if not env_ok or is_winxp:
+        cmd, include_path, lib_path = FindWinSDK7(host_cpu, target_cpu)
+        if include_path is None or lib_path is None:
+            assert False, 'Cannot find Windows SDK 7, please make sure it is installed.'
+    if not env_ok:
+        shell_cmd = '"%s" %s && Set' % (cmd[0], ' '.join(cmd[1:]))
+        env_lines = ExecuteCmd(shell_cmd)
     ENV_VAR_TO_SAVE = (
         'INCLUDE',
         'LIB',
