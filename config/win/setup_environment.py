@@ -98,7 +98,28 @@ def DetectSetEnvBatchFileByFindVC6(host_cpu, target_cpu):
 
 def FindWinSDK7(host_cpu, target_cpu):
     with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\Microsoft SDKs\Windows', 0, winreg.KEY_READ | winreg.KEY_WOW64_32KEY) as key:
-        sdk_dir, type = winreg.QueryValueEx(key, "CurrentInstallFolder")
+        try:
+            sdk_dir, _ = winreg.QueryValueEx(key, "CurrentInstallFolder")
+        except WindowsError:
+            installed_sdks = []
+            i = 0
+            while True:
+                try:
+                    subkey = winreg.EnumKey(key, i)
+                    if subkey.startswith('v7'):
+                        installed_sdks.append(subkey)
+                    i += 1
+                except WindowsError:
+                    break
+            installed_sdks = sorted(installed_sdks, reverse=True)
+            for sdk_version in installed_sdks:
+                with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\Microsoft SDKs\Windows\%s' % sdk_version, 0, winreg.KEY_READ | winreg.KEY_WOW64_32KEY) as key:
+                    try:
+                        sdk_dir, _ = winreg.QueryValueEx(key, "InstallationFolder")
+                    except WindowsError:
+                        continue
+    if sdk_dir is None:
+        return None, None, None
     include_path = os.path.join(sdk_dir, 'Include')
     lib_path = os.path.join(sdk_dir, 'Lib')
     if target_cpu == 'x64':
@@ -147,16 +168,15 @@ def SetupEnvironment(expected_vs_version, host_cpu, target_cpu, is_winxp):
                 cmd[0]), 'Microsoft.VCToolsVersion.v141.default.txt')
             vc_version_file = os.path.join(os.path.dirname(
                 cmd[0]), 'Microsoft.VCToolsVersion.default.txt')
-            if not os.path.exists(vc141_version_file):
-                assert False, 'v141_xp toolset not installed'
-            with open(vc141_version_file, 'r') as f:
-                vc141_version = f.read().strip()
-            with open(vc_version_file, 'r') as f:
-                vc_version = f.read().strip()
-            env['INCLUDE'] = env['INCLUDE'].replace(vc_version, vc141_version)
-            env['LIB'] = env['LIB'].replace(vc_version, vc141_version)
-            env['LIBPATH'] = env['LIBPATH'].replace(vc_version, vc141_version)
-            env['PATH'] = env['PATH'].replace(vc_version, vc141_version)
+            if os.path.exists(vc141_version_file):
+                with open(vc141_version_file, 'r') as f:
+                    vc141_version = f.read().strip()
+                with open(vc_version_file, 'r') as f:
+                    vc_version = f.read().strip()
+                env['INCLUDE'] = env['INCLUDE'].replace(vc_version, vc141_version)
+                env['LIB'] = env['LIB'].replace(vc_version, vc141_version)
+                env['LIBPATH'] = env['LIBPATH'].replace(vc_version, vc141_version)
+                env['PATH'] = env['PATH'].replace(vc_version, vc141_version)
 
         env['INCLUDE'] = include_path + ';' + env['INCLUDE']
         env['LIB'] = lib_path + ';' + env['LIB']
