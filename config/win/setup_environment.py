@@ -79,6 +79,8 @@ def DetectSetEnvBatchFileByEnvVar(expected_vs_version, host_cpu, target_cpu):
                     arch = target_cpu
                 else:
                     arch = host_cpu + '_' + target_cpu
+                if version <= VS_2015_VERSION:
+                    arch = arch.replace('x64', 'amd64')
                 return version, [batch_file, arch]
         else:
             batch_file = os.path.join(path, 'vsvars32.bat')
@@ -97,36 +99,35 @@ def DetectSetEnvBatchFileByFindVC6(host_cpu, target_cpu):
 
 
 def FindWinSDK7(host_cpu, target_cpu):
+    installed_sdks = []
     with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\Microsoft SDKs\Windows', 0, winreg.KEY_READ | winreg.KEY_WOW64_32KEY) as key:
         try:
             sdk_dir, _ = winreg.QueryValueEx(key, "CurrentInstallFolder")
-        except WindowsError:
-            installed_sdks = []
-            i = 0
-            while True:
-                try:
-                    subkey = winreg.EnumKey(key, i)
-                    if subkey.startswith('v7'):
-                        installed_sdks.append(subkey)
-                    i += 1
-                except WindowsError:
-                    break
-            installed_sdks = sorted(installed_sdks, reverse=True)
-            for sdk_version in installed_sdks:
-                with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\Microsoft SDKs\Windows\%s' % sdk_version, 0, winreg.KEY_READ | winreg.KEY_WOW64_32KEY) as key:
-                    try:
-                        sdk_dir, _ = winreg.QueryValueEx(key, "InstallationFolder")
-                    except WindowsError:
-                        continue
-    if sdk_dir is None:
-        return None, None, None
-    include_path = os.path.join(sdk_dir, 'Include')
-    lib_path = os.path.join(sdk_dir, 'Lib')
-    if target_cpu == 'x64':
-        lib_path = os.path.join(lib_path, 'x64')
-    if not os.path.exists(include_path) or not os.path.exists(lib_path):
-        return None, None, None
-    return [os.path.join(sdk_dir, 'bin', 'setenv.cmd'), '/' + target_cpu], include_path, lib_path
+            installed_sdks.append(sdk_dir)
+        except:
+            pass
+        i = 0
+        while True:
+            try:
+                sub_key = winreg.EnumKey(key, i)
+                if sub_key.startswith('v7'):
+                    with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\Microsoft SDKs\Windows\%s' % sub_key, 0, winreg.KEY_READ | winreg.KEY_WOW64_32KEY) as key:
+                        try:
+                            sdk_dir, _ = winreg.QueryValueEx(key, "InstallationFolder")
+                            installed_sdks.append(sdk_dir)
+                        except:
+                            pass
+            except WindowsError:
+                break
+    installed_sdks = sorted(installed_sdks, reverse=True)
+    for sdk_dir in installed_sdks:
+        include_path = os.path.join(sdk_dir, 'Include')
+        lib_path = os.path.join(sdk_dir, 'Lib')
+        if target_cpu == 'x64':
+            lib_path = os.path.join(lib_path, 'x64')
+        if os.path.exists(include_path) and os.path.exists(lib_path):
+            return [os.path.join(sdk_dir, 'bin', 'setenv.cmd'), '/' + target_cpu], include_path, lib_path
+    return None, None, None
 
 
 def SetupEnvironment(expected_vs_version, host_cpu, target_cpu, is_winxp):
