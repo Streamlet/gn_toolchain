@@ -100,25 +100,29 @@ def DetectSetEnvBatchFileByFindVC6(host_cpu, target_cpu):
 
 def FindWinSDK7(host_cpu, target_cpu):
     installed_sdks = []
-    with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\Microsoft SDKs\Windows', 0, winreg.KEY_READ | winreg.KEY_WOW64_32KEY) as key:
-        try:
-            sdk_dir, _ = winreg.QueryValueEx(key, "CurrentInstallFolder")
-            installed_sdks.append(sdk_dir)
-        except:
-            pass
-        i = 0
-        while True:
+    try:
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\Microsoft SDKs\Windows', 0, winreg.KEY_READ | winreg.KEY_WOW64_32KEY) as key:
             try:
-                sub_key = winreg.EnumKey(key, i)
-                if sub_key.startswith('v7'):
-                    with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\Microsoft SDKs\Windows\%s' % sub_key, 0, winreg.KEY_READ | winreg.KEY_WOW64_32KEY) as key:
-                        try:
-                            sdk_dir, _ = winreg.QueryValueEx(key, "InstallationFolder")
-                            installed_sdks.append(sdk_dir)
-                        except:
-                            pass
-            except WindowsError:
-                break
+                sdk_dir, _ = winreg.QueryValueEx(key, "CurrentInstallFolder")
+                installed_sdks.append(sdk_dir)
+            except:
+                pass
+            i = 0
+            while True:
+                try:
+                    sub_key = winreg.EnumKey(key, i)
+                    if sub_key.startswith('v7'):
+                        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\Microsoft SDKs\Windows\%s' % sub_key, 0, winreg.KEY_READ | winreg.KEY_WOW64_32KEY) as key:
+                            try:
+                                sdk_dir, _ = winreg.QueryValueEx(key, "InstallationFolder")
+                                installed_sdks.append(sdk_dir)
+                            except:
+                                pass
+                except WindowsError:
+                    break
+                i = i + 1
+    except WindowsError:
+        return None, None, None
     installed_sdks = sorted(installed_sdks, reverse=True)
     for sdk_dir in installed_sdks:
         include_path = os.path.join(sdk_dir, 'Include')
