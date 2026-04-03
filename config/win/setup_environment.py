@@ -18,6 +18,7 @@ VS_2015_VERSION = 140
 VS_2017_VERSION = 150
 VS_2019_VERSION = 160
 VS_2022_VERSION = 170
+VS_2026_VERSION = 180
 
 
 def ExecuteCmd(cmd):
@@ -143,6 +144,8 @@ def SetupEnvironment(expected_vs_version, host_cpu, target_cpu, is_winxp):
     if cmd is None and not is_winxp:
         assert False, 'Cannot find Windows SDK set-env batch file'
     shell_cmd = '"%s" %s && Set' % (cmd[0], ' '.join(cmd[1:]))
+    if is_winxp and version > VS_2017_VERSION:
+        shell_cmd = '"%s" %s 8.1 -vcvars_ver=14.16 && Set' % (cmd[0], ' '.join(cmd[1:]))
     env_lines = ExecuteCmd(shell_cmd)
     env_ok = 'INCLUDE' in env_lines
     if not env_ok or (expected_vs_version > 0 and version != expected_vs_version) or is_winxp:
