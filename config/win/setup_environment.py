@@ -128,10 +128,12 @@ def FindWinSDK7(host_cpu, target_cpu):
     for sdk_dir in installed_sdks:
         include_path = os.path.join(sdk_dir, 'Include')
         lib_path = os.path.join(sdk_dir, 'Lib')
+        bin_path = os.path.join(sdk_dir, 'Bin')
         if target_cpu == 'x64':
             lib_path = os.path.join(lib_path, 'x64')
+            bin_path = os.path.join(bin_path, 'x64')
         if os.path.exists(include_path) and os.path.exists(lib_path):
-            return [os.path.join(sdk_dir, 'bin', 'setenv.cmd'), '/' + target_cpu], include_path, lib_path
+            return [os.path.join(sdk_dir, 'bin', 'setenv.cmd'), '/' + target_cpu], include_path, lib_path, bin_path
     return None, None, None
 
 
@@ -149,8 +151,8 @@ def SetupEnvironment(expected_vs_version, host_cpu, target_cpu, is_winxp):
     env_lines = ExecuteCmd(shell_cmd)
     env_ok = 'INCLUDE' in env_lines
     if not env_ok or (expected_vs_version > 0 and version != expected_vs_version) or is_winxp:
-        cmd, include_path, lib_path = FindWinSDK7(host_cpu, target_cpu)
-        if include_path is None or lib_path is None:
+        cmd, include_path, lib_path, bin_path = FindWinSDK7(host_cpu, target_cpu)
+        if include_path is None or lib_path is None or bin_path is None:
             assert False, 'Cannot find Windows SDK.'
         if not env_ok:
             shell_cmd = '"%s" %s && Set' % (cmd[0], ' '.join(cmd[1:]))
@@ -189,6 +191,7 @@ def SetupEnvironment(expected_vs_version, host_cpu, target_cpu, is_winxp):
         env['INCLUDE'] = include_path + ';' + env['INCLUDE']
         env['LIB'] = lib_path + ';' + env['LIB']
         env['LIBPATH'] = lib_path + ';' + env['LIBPATH']
+        env['PATH'] = bin_path + ';' + env['PATH']
 
     env_file_content = ''
     for k in env:
