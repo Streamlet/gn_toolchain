@@ -123,7 +123,7 @@ def FindWinSDK7(host_cpu, target_cpu):
                     break
                 i = i + 1
     except WindowsError:
-        return None, None, None
+        return None, None, None, None
     installed_sdks = sorted(installed_sdks, reverse=True)
     for sdk_dir in installed_sdks:
         include_path = os.path.join(sdk_dir, 'Include')
@@ -134,7 +134,7 @@ def FindWinSDK7(host_cpu, target_cpu):
             bin_path = os.path.join(bin_path, 'x64')
         if os.path.exists(include_path) and os.path.exists(lib_path):
             return [os.path.join(sdk_dir, 'bin', 'setenv.cmd'), '/' + target_cpu], include_path, lib_path, bin_path
-    return None, None, None
+    return None, None, None, None
 
 
 def SetupEnvironment(expected_vs_version, host_cpu, target_cpu, is_winxp):
@@ -143,8 +143,8 @@ def SetupEnvironment(expected_vs_version, host_cpu, target_cpu, is_winxp):
         version, cmd = DetectSetEnvBatchFileByEnvVar(expected_vs_version, host_cpu, target_cpu)
     if cmd is None or (expected_vs_version > 0 and version != expected_vs_version):
         version, cmd = DetectSetEnvBatchFileByFindVC6(host_cpu, target_cpu)
-    if cmd is None and not is_winxp:
-        assert False, 'Cannot find Windows SDK set-env batch file'
+    if cmd is None:
+        assert False, 'Cannot find MSVC set-env batch file'
     shell_cmd = '"%s" %s && Set' % (cmd[0], ' '.join(cmd[1:]))
     if is_winxp and version > VS_2017_VERSION:
         shell_cmd = '"%s" %s 8.1 -vcvars_ver=14.16 && Set' % (cmd[0], ' '.join(cmd[1:]))
