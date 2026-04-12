@@ -150,6 +150,11 @@ def SetupEnvironment(expected_vs_version, host_cpu, target_cpu, is_winxp):
         shell_cmd = '"%s" %s 8.1 -vcvars_ver=14.16 && Set' % (cmd[0], ' '.join(cmd[1:]))
     env_lines = ExecuteCmd(shell_cmd)
     env_ok = 'INCLUDE' in env_lines
+    if is_winxp and version > VS_2017_VERSION:
+        vc141_version_file = os.path.join(os.path.dirname(
+            cmd[0]), 'Microsoft.VCToolsVersion.v141.default.txt')
+        vc_version_file = os.path.join(os.path.dirname(
+            cmd[0]), 'Microsoft.VCToolsVersion.default.txt')
     if not env_ok or (expected_vs_version > 0 and version != expected_vs_version) or is_winxp:
         cmd, include_path, lib_path, bin_path = FindWinSDK7(host_cpu, target_cpu)
         if include_path is None or lib_path is None or bin_path is None:
@@ -173,11 +178,15 @@ def SetupEnvironment(expected_vs_version, host_cpu, target_cpu, is_winxp):
         if kv[0].upper() in ENV_VAR_TO_SAVE:
             env[kv[0].upper()] = kv[1].strip()
     if is_winxp:
+        env['INCLUDE'] = re.sub(
+            r'[0-9.]+\\ucrt', r'10.0.10240.0\\ucrt', env['INCLUDE'])
+        env['LIB'] = re.sub(
+            r'[0-9.]+\\ucrt', r'10.0.10240.0\\ucrt', env['LIB'])
+        env['LIBPATH'] = re.sub(
+            r'[0-9.]+\\ucrt', r'10.0.10240.0\\ucrt', env['LIBPATH'])
+        env['PATH'] = re.sub(
+            r'[0-9.]+\\ucrt', r'10.0.10240.0\\ucrt', env['PATH'])
         if version > VS_2017_VERSION:
-            vc141_version_file = os.path.join(os.path.dirname(
-                cmd[0]), 'Microsoft.VCToolsVersion.v141.default.txt')
-            vc_version_file = os.path.join(os.path.dirname(
-                cmd[0]), 'Microsoft.VCToolsVersion.default.txt')
             if os.path.exists(vc141_version_file):
                 with open(vc141_version_file, 'r') as f:
                     vc141_version = f.read().strip()
